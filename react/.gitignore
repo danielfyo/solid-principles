@@ -1,0 +1,35 @@
+# Node.js / Vite / React ignores. Based on https://github.com/github/gitignore/blob/main/Node.gitignore
+# Note: package-lock.json IS committed (reproducible installs with `npm ci`).
+
+# Dependencies
+/node_modules/
+.pnp
+.pnp.js
+.yarn/*
+!.yarn/releases
+
+# Vite build output and caches
+/dist/
+/dist-ssr/
+/.vite/
+*.local
+*.tsbuildinfo
+
+# Tests and coverage
+/coverage/
+
+# Storybook
+/storybook-static/
+
+# Caches
+/.cache/
+.eslintcache
+/.npm/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Local env files (.env, .env.*) are ignored by the root .gitignore.

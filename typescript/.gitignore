@@ -1,0 +1,32 @@
+# Node.js / TypeScript ignores. Based on https://github.com/github/gitignore/blob/main/Node.gitignore
+# Note: package-lock.json IS committed (reproducible installs with `npm ci`).
+
+# Dependencies
+/node_modules/
+.pnp
+.pnp.js
+.yarn/*
+!.yarn/releases
+
+# Build output
+/dist/
+/build/
+/out/
+*.tsbuildinfo
+
+# Tests and coverage
+/coverage/
+/.nyc_output/
+
+# Caches
+/.cache/
+.eslintcache
+/.npm/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Local env files (.env, .env.*) are ignored by the root .gitignore.

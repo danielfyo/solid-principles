@@ -1,0 +1,56 @@
+# Python ignores. Based on https://github.com/github/gitignore/blob/main/Python.gitignore
+
+# Byte-compiled / optimized files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Packaging
+/build/
+/dist/
+/develop-eggs/
+/eggs/
+/.eggs/
+/sdist/
+/wheels/
+*.egg-info/
+*.egg
+.installed.cfg
+MANIFEST
+/pip-wheel-metadata/
+/share/python-wheels/
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Virtual environments
+/.venv/
+/venv/
+/env/
+/ENV/
+# Uncomment if you don't want to pin the Python version with pyenv:
+# .python-version
+
+# Test, coverage and tooling caches
+.pytest_cache/
+.tox/
+.nox/
+.coverage
+.coverage.*
+/htmlcov/
+coverage.xml
+*.cover
+.hypothesis/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+.ruff_cache/
+
+# Jupyter
+.ipynb_checkpoints/

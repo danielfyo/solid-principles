@@ -1,0 +1,25 @@
+# Go ignores. Based on https://github.com/github/gitignore/blob/main/Go.gitignore
+
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+/bin/
+
+# Test binaries built with `go test -c`
+*.test
+
+# Coverage and profiling output
+*.out
+coverage.html
+*.coverprofile
+*.prof
+
+# Dependency directory (only if you vendor)
+/vendor/
+
+# Local workspace file
+go.work
+go.work.sum
