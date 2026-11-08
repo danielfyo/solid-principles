@@ -15,22 +15,22 @@
 ![.NET 8](https://img.shields.io/badge/.NET-8-512BD4?logo=dotnet&logoColor=white)
 ![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
 ![Go 1.22](https://img.shields.io/badge/Go-1.22-00ADD8?logo=go&logoColor=white)
-![TypeScript 5](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
-![React 18](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)
+![TypeScript 7](https://img.shields.io/badge/TypeScript-7-3178C6?logo=typescript&logoColor=white)
+![React 19](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
 
 > **One e-commerce domain. Five principles. Five languages. Every example runnable and tested.**
 >
 > This guide takes you from "I've heard the acronym" to "I can explain the trade-offs in a design review
 > and refactor a legacy codebase safely". Every concept is shown as a **❌ problem** and a **✅ solution**,
-> written equivalently in **C# (.NET 8)**, **Python 3.12**, **Go 1.22**, **TypeScript 5** and **React 18**.
+> written equivalently in **C# (.NET 8)**, **Python 3.12**, **Go 1.22**, **TypeScript 7** and **React 19**.
 
 | Language | Folder | Tests | Run |
 | --- | --- | --- | --- |
 | 🟣 C# / .NET 8 | [`dotnet/`](dotnet) | xUnit | `cd dotnet && dotnet test` |
 | 🐍 Python 3.12 | [`python/`](python) | pytest + mypy `--strict` + ruff | `cd python && pytest` |
 | 🐹 Go 1.22 | [`go/`](go) | `go test` | `cd go && go test ./...` |
-| 🔷 TypeScript 5 | [`typescript/`](typescript) | Vitest | `cd typescript && npm ci && npm test` |
-| ⚛️ React 18 | [`react/`](react) | Vitest + Testing Library | `cd react && npm ci && npm test` |
+| 🔷 TypeScript 7 | [`typescript/`](typescript) | Vitest | `cd typescript && npm ci && npm test` |
+| ⚛️ React 19 | [`react/`](react) | Vitest + Testing Library | `cd react && npm ci && npm test` |
 
 > [!TIP]
 > The code blocks in this README are **generated from the real source files** by
@@ -472,7 +472,7 @@ func (s *OrderService) PlaceOrder(order Order) (Cents, error) {
 
 </details>
 <details>
-<summary><b>🔷 TypeScript 5</b> — <code>typescript/src/srp/bad.ts</code></summary>
+<summary><b>🔷 TypeScript 7</b> — <code>typescript/src/srp/bad.ts</code></summary>
 
 <!-- snippet: typescript/src/srp/bad.ts -->
 ```typescript
@@ -528,7 +528,7 @@ export class OrderService {
 
 </details>
 <details>
-<summary><b>⚛️ React 18 + TypeScript</b> — <code>react/src/srp/types.ts</code>, <code>react/src/srp/bad/OrderSummary.tsx</code></summary>
+<summary><b>⚛️ React 19 + TypeScript</b> — <code>react/src/srp/types.ts</code>, <code>react/src/srp/bad/OrderSummary.tsx</code></summary>
 
 <!-- snippet: react/src/srp/types.ts, react/src/srp/bad/OrderSummary.tsx -->
 ```typescript
@@ -1027,7 +1027,7 @@ func (s *OrderService) PlaceOrder(order Order) (OrderTotals, error) {
 
 </details>
 <details>
-<summary><b>🔷 TypeScript 5</b> — <code>typescript/src/srp/good.ts</code></summary>
+<summary><b>🔷 TypeScript 7</b> — <code>typescript/src/srp/good.ts</code></summary>
 
 <!-- snippet: typescript/src/srp/good.ts -->
 ```typescript
@@ -1126,7 +1126,7 @@ export class OrderService {
 
 </details>
 <details>
-<summary><b>⚛️ React 18 + TypeScript</b> — <code>react/src/srp/good/orderTotals.ts</code>, <code>react/src/srp/good/orderApi.ts</code>, <code>react/src/srp/good/useOrder.ts</code>, <code>react/src/srp/good/OrderSummaryView.tsx</code>, <code>react/src/srp/good/OrderSummary.tsx</code></summary>
+<summary><b>⚛️ React 19 + TypeScript</b> — <code>react/src/srp/good/orderTotals.ts</code>, <code>react/src/srp/good/orderApi.ts</code>, <code>react/src/srp/good/useOrder.ts</code>, <code>react/src/srp/good/OrderSummaryView.tsx</code>, <code>react/src/srp/good/OrderSummary.tsx</code></summary>
 
 <!-- snippet: react/src/srp/good/orderTotals.ts, react/src/srp/good/orderApi.ts, react/src/srp/good/useOrder.ts, react/src/srp/good/OrderSummaryView.tsx, react/src/srp/good/OrderSummary.tsx -->
 ```typescript
@@ -1502,7 +1502,7 @@ func TestServiceDoesNotSaveOrNotifyInvalidOrders(t *testing.T) {
 
 </details>
 <details>
-<summary><b>🔷 TypeScript 5</b> — <code>typescript/tests/srp.test.ts</code></summary>
+<summary><b>🔷 TypeScript 7</b> — <code>typescript/tests/srp.test.ts</code></summary>
 
 <!-- snippet: typescript/tests/srp.test.ts -->
 ```typescript
@@ -1576,7 +1576,7 @@ describe("SRP", () => {
 
 </details>
 <details>
-<summary><b>⚛️ React 18 + TypeScript</b> — <code>react/src/srp/srp.test.tsx</code></summary>
+<summary><b>⚛️ React 19 + TypeScript</b> — <code>react/src/srp/srp.test.tsx</code></summary>
 
 <!-- snippet: react/src/srp/srp.test.tsx -->
 ```tsx
@@ -1842,7 +1842,7 @@ func CalculateDiscount(cart Cart) Cents {
 
 </details>
 <details>
-<summary><b>🔷 TypeScript 5</b> — <code>typescript/src/ocp/bad.ts</code></summary>
+<summary><b>🔷 TypeScript 7</b> — <code>typescript/src/ocp/bad.ts</code></summary>
 
 <!-- snippet: typescript/src/ocp/bad.ts -->
 ```typescript
@@ -1884,7 +1884,7 @@ export function calculateDiscount(cart: Cart): Cents {
 
 </details>
 <details>
-<summary><b>⚛️ React 18 + TypeScript</b> — <code>react/src/ocp/bad/PaymentOptions.tsx</code></summary>
+<summary><b>⚛️ React 19 + TypeScript</b> — <code>react/src/ocp/bad/PaymentOptions.tsx</code></summary>
 
 <!-- snippet: react/src/ocp/bad/PaymentOptions.tsx -->
 ```tsx
@@ -2215,7 +2215,7 @@ func (c DiscountCalculator) CalculateDiscount(cart Cart) Cents {
 
 </details>
 <details>
-<summary><b>🔷 TypeScript 5</b> — <code>typescript/src/ocp/good.ts</code></summary>
+<summary><b>🔷 TypeScript 7</b> — <code>typescript/src/ocp/good.ts</code></summary>
 
 <!-- snippet: typescript/src/ocp/good.ts -->
 ```typescript
@@ -2281,7 +2281,7 @@ export class DiscountCalculator {
 
 </details>
 <details>
-<summary><b>⚛️ React 18 + TypeScript</b> — <code>react/src/ocp/good/PaymentOptions.tsx</code>, <code>react/src/ocp/good/paymentRegistry.tsx</code></summary>
+<summary><b>⚛️ React 19 + TypeScript</b> — <code>react/src/ocp/good/PaymentOptions.tsx</code>, <code>react/src/ocp/good/paymentRegistry.tsx</code></summary>
 
 <!-- snippet: react/src/ocp/good/PaymentOptions.tsx, react/src/ocp/good/paymentRegistry.tsx -->
 ```tsx
@@ -2551,7 +2551,7 @@ func TestDiscountNeverExceedsTheSubtotal(t *testing.T) {
 
 </details>
 <details>
-<summary><b>🔷 TypeScript 5</b> — <code>typescript/tests/ocp.test.ts</code></summary>
+<summary><b>🔷 TypeScript 7</b> — <code>typescript/tests/ocp.test.ts</code></summary>
 
 <!-- snippet: typescript/tests/ocp.test.ts -->
 ```typescript
@@ -2595,7 +2595,7 @@ describe("OCP", () => {
 
 </details>
 <details>
-<summary><b>⚛️ React 18 + TypeScript</b> — <code>react/src/ocp/ocp.test.tsx</code></summary>
+<summary><b>⚛️ React 19 + TypeScript</b> — <code>react/src/ocp/ocp.test.tsx</code></summary>
 
 <!-- snippet: react/src/ocp/ocp.test.tsx -->
 ```tsx
@@ -2952,7 +2952,7 @@ func RefundOrder(method PaymentMethod, receipt Receipt) error {
 
 </details>
 <details>
-<summary><b>🔷 TypeScript 5</b> — <code>typescript/src/lsp/bad.ts</code></summary>
+<summary><b>🔷 TypeScript 7</b> — <code>typescript/src/lsp/bad.ts</code></summary>
 
 <!-- snippet: typescript/src/lsp/bad.ts -->
 ```typescript
@@ -3014,7 +3014,7 @@ export class RefundService {
 
 </details>
 <details>
-<summary><b>⚛️ React 18 + TypeScript</b> — <code>react/src/lsp/bad/Buttons.tsx</code></summary>
+<summary><b>⚛️ React 19 + TypeScript</b> — <code>react/src/lsp/bad/Buttons.tsx</code></summary>
 
 <!-- snippet: react/src/lsp/bad/Buttons.tsx -->
 ```tsx
@@ -3417,7 +3417,7 @@ func RefundOrder(method Refundable, receipt Receipt) error {
 
 </details>
 <details>
-<summary><b>🔷 TypeScript 5</b> — <code>typescript/src/lsp/good.ts</code></summary>
+<summary><b>🔷 TypeScript 7</b> — <code>typescript/src/lsp/good.ts</code></summary>
 
 <!-- snippet: typescript/src/lsp/good.ts -->
 ```typescript
@@ -3516,7 +3516,7 @@ export class RefundService {
 
 </details>
 <details>
-<summary><b>⚛️ React 18 + TypeScript</b> — <code>react/src/lsp/good/Buttons.tsx</code></summary>
+<summary><b>⚛️ React 19 + TypeScript</b> — <code>react/src/lsp/good/Buttons.tsx</code></summary>
 
 <!-- snippet: react/src/lsp/good/Buttons.tsx -->
 ```tsx
@@ -3791,7 +3791,7 @@ func TestGiftCardsAreSimplyNotRefundable(t *testing.T) {
 
 </details>
 <details>
-<summary><b>🔷 TypeScript 5</b> — <code>typescript/tests/lsp.test.ts</code></summary>
+<summary><b>🔷 TypeScript 7</b> — <code>typescript/tests/lsp.test.ts</code></summary>
 
 <!-- snippet: typescript/tests/lsp.test.ts -->
 ```typescript
@@ -3868,7 +3868,7 @@ describe("LSP - the solution", () => {
 
 </details>
 <details>
-<summary><b>⚛️ React 18 + TypeScript</b> — <code>react/src/lsp/lsp.test.tsx</code></summary>
+<summary><b>⚛️ React 19 + TypeScript</b> — <code>react/src/lsp/lsp.test.tsx</code></summary>
 
 <!-- snippet: react/src/lsp/lsp.test.tsx -->
 ```tsx
@@ -4237,7 +4237,7 @@ func (p InvoicePrinter) Print(orderID string) (string, error) {
 
 </details>
 <details>
-<summary><b>🔷 TypeScript 5</b> — <code>typescript/src/isp/bad.ts</code></summary>
+<summary><b>🔷 TypeScript 7</b> — <code>typescript/src/isp/bad.ts</code></summary>
 
 <!-- snippet: typescript/src/isp/bad.ts -->
 ```typescript
@@ -4302,7 +4302,7 @@ export class InvoicePrinter {
 
 </details>
 <details>
-<summary><b>⚛️ React 18 + TypeScript</b> — <code>react/src/isp/types.ts</code>, <code>react/src/isp/bad/CustomerBadge.tsx</code></summary>
+<summary><b>⚛️ React 19 + TypeScript</b> — <code>react/src/isp/types.ts</code>, <code>react/src/isp/bad/CustomerBadge.tsx</code></summary>
 
 <!-- snippet: react/src/isp/types.ts, react/src/isp/bad/CustomerBadge.tsx -->
 ```typescript
@@ -4691,7 +4691,7 @@ func (d SalesDashboard) MonthlySummary(year int, month time.Month) string {
 
 </details>
 <details>
-<summary><b>🔷 TypeScript 5</b> — <code>typescript/src/isp/good.ts</code></summary>
+<summary><b>🔷 TypeScript 7</b> — <code>typescript/src/isp/good.ts</code></summary>
 
 <!-- snippet: typescript/src/isp/good.ts -->
 ```typescript
@@ -4788,7 +4788,7 @@ export class SalesDashboard {
 
 </details>
 <details>
-<summary><b>⚛️ React 18 + TypeScript</b> — <code>react/src/isp/good/CustomerBadge.tsx</code>, <code>react/src/isp/good/OrderHeader.tsx</code></summary>
+<summary><b>⚛️ React 19 + TypeScript</b> — <code>react/src/isp/good/CustomerBadge.tsx</code>, <code>react/src/isp/good/OrderHeader.tsx</code></summary>
 
 <!-- snippet: react/src/isp/good/CustomerBadge.tsx, react/src/isp/good/OrderHeader.tsx -->
 ```tsx
@@ -5036,7 +5036,7 @@ func TestLiveStorePlaysEveryRole(t *testing.T) {
 
 </details>
 <details>
-<summary><b>🔷 TypeScript 5</b> — <code>typescript/tests/isp.test.ts</code></summary>
+<summary><b>🔷 TypeScript 7</b> — <code>typescript/tests/isp.test.ts</code></summary>
 
 <!-- snippet: typescript/tests/isp.test.ts -->
 ```typescript
@@ -5091,7 +5091,7 @@ describe("ISP", () => {
 
 </details>
 <details>
-<summary><b>⚛️ React 18 + TypeScript</b> — <code>react/src/isp/isp.test.tsx</code></summary>
+<summary><b>⚛️ React 19 + TypeScript</b> — <code>react/src/isp/isp.test.tsx</code></summary>
 
 <!-- snippet: react/src/isp/isp.test.tsx -->
 ```tsx
@@ -5419,7 +5419,7 @@ func (s *CheckoutService) Checkout(ctx context.Context, email string, amountCent
 
 </details>
 <details>
-<summary><b>🔷 TypeScript 5</b> — <code>typescript/src/dip/bad.ts</code></summary>
+<summary><b>🔷 TypeScript 7</b> — <code>typescript/src/dip/bad.ts</code></summary>
 
 <!-- snippet: typescript/src/dip/bad.ts -->
 ```typescript
@@ -5470,7 +5470,7 @@ export class CheckoutService {
 
 </details>
 <details>
-<summary><b>⚛️ React 18 + TypeScript</b> — <code>react/src/dip/bad/stripeClient.ts</code>, <code>react/src/dip/bad/CheckoutButton.tsx</code></summary>
+<summary><b>⚛️ React 19 + TypeScript</b> — <code>react/src/dip/bad/stripeClient.ts</code>, <code>react/src/dip/bad/CheckoutButton.tsx</code></summary>
 
 <!-- snippet: react/src/dip/bad/stripeClient.ts, react/src/dip/bad/CheckoutButton.tsx -->
 ```typescript
@@ -5892,7 +5892,7 @@ func NewDefaultCheckoutService() *CheckoutService {
 
 </details>
 <details>
-<summary><b>🔷 TypeScript 5</b> — <code>typescript/src/dip/good.ts</code></summary>
+<summary><b>🔷 TypeScript 7</b> — <code>typescript/src/dip/good.ts</code></summary>
 
 <!-- snippet: typescript/src/dip/good.ts -->
 ```typescript
@@ -5986,7 +5986,7 @@ export const createCheckoutService = (): CheckoutService =>
 
 </details>
 <details>
-<summary><b>⚛️ React 18 + TypeScript</b> — <code>react/src/dip/good/paymentGateway.ts</code>, <code>react/src/dip/good/ServicesContext.tsx</code>, <code>react/src/dip/good/CheckoutButton.tsx</code>, <code>react/src/dip/good/stripePaymentGateway.ts</code>, <code>react/src/main.tsx</code></summary>
+<summary><b>⚛️ React 19 + TypeScript</b> — <code>react/src/dip/good/paymentGateway.ts</code>, <code>react/src/dip/good/ServicesContext.tsx</code>, <code>react/src/dip/good/CheckoutButton.tsx</code>, <code>react/src/dip/good/stripePaymentGateway.ts</code>, <code>react/src/main.tsx</code></summary>
 
 <!-- snippet: react/src/dip/good/paymentGateway.ts, react/src/dip/good/ServicesContext.tsx, react/src/dip/good/CheckoutButton.tsx, react/src/dip/good/stripePaymentGateway.ts, react/src/main.tsx -->
 ```typescript
@@ -6314,7 +6314,7 @@ func TestCompositionRootWiresTheRealAdapters(t *testing.T) {
 
 </details>
 <details>
-<summary><b>🔷 TypeScript 5</b> — <code>typescript/tests/dip.test.ts</code></summary>
+<summary><b>🔷 TypeScript 7</b> — <code>typescript/tests/dip.test.ts</code></summary>
 
 <!-- snippet: typescript/tests/dip.test.ts -->
 ```typescript
@@ -6383,7 +6383,7 @@ describe("DIP", () => {
 
 </details>
 <details>
-<summary><b>⚛️ React 18 + TypeScript</b> — <code>react/src/dip/dip.test.tsx</code></summary>
+<summary><b>⚛️ React 19 + TypeScript</b> — <code>react/src/dip/dip.test.tsx</code></summary>
 
 <!-- snippet: react/src/dip/dip.test.tsx -->
 ```tsx
@@ -6872,7 +6872,7 @@ go vet ./...
 go test ./...
 ```
 
-### 🔷 TypeScript 5
+### 🔷 TypeScript 7
 
 ```bash
 cd typescript
@@ -6881,7 +6881,7 @@ npm run typecheck
 npm test
 ```
 
-### ⚛️ React 18
+### ⚛️ React 19
 
 ```bash
 cd react
