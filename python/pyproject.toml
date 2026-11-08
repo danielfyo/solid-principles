@@ -9,7 +9,7 @@ description = "SOLID principles explained with runnable, tested examples."
 requires-python = ">=3.12"
 
 [project.optional-dependencies]
-dev = ["pytest>=8", "mypy>=1.10", "ruff>=0.5"]
+dev = ["pytest>=8", "pytest-cov>=5", "mypy>=1.10", "ruff>=0.5"]
 
 [tool.setuptools.packages.find]
 include = ["solid*"]
@@ -17,6 +17,13 @@ include = ["solid*"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+
+[tool.coverage.run]
+source = ["solid"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
 
 [tool.mypy]
 strict = true
