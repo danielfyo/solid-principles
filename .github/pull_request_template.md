@@ -13,7 +13,7 @@
 ## Checklist
 
 - [ ] The title follows [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) (`type(scope): description`).
-- [ ] The change is mirrored in **all five languages** (C#, Python, Go, TypeScript, React), or it does not apply to code.
+- [ ] The change is mirrored in **all six languages** (C#, Python, Go, TypeScript, React, Angular), or it does not apply to code.
 - [ ] Tests were added or updated, and every affected project passes its checks locally.
 - [ ] `python3 scripts/sync_readme.py` was run if source code shown in the README changed.
 - [ ] Commits are signed.
