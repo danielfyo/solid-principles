@@ -5,6 +5,25 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), ver
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html), and entries are generated from
 [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) by release-please.
 
+## [1.1.0](https://github.com/danielfyo/solid-principles-dotnet/compare/v1.0.1...v1.1.0) (2026-11-08)
+
+
+### Features
+
+* **angular:** add Angular as the sixth implementation ([2651e6a](https://github.com/danielfyo/solid-principles-dotnet/commit/2651e6a763763a83d54f58400b9b0af2ba25d84a))
+* **angular:** add Angular as the sixth implementation ([#24](https://github.com/danielfyo/solid-principles-dotnet/issues/24)) ([2651e6a](https://github.com/danielfyo/solid-principles-dotnet/commit/2651e6a763763a83d54f58400b9b0af2ba25d84a))
+* **angular:** add SOLID examples as Angular components, services and DI ([a3330e3](https://github.com/danielfyo/solid-principles-dotnet/commit/a3330e33fbd1c0230b53314c1d375d1cc8d0b261))
+
+
+### Documentation
+
+* add Angular to the master class ([b66c252](https://github.com/danielfyo/solid-principles-dotnet/commit/b66c2528ae40850735db9098bb66bc37c5dc0a29))
+
+
+### Continuous Integration
+
+* build, test and report coverage for the Angular project ([e8faee6](https://github.com/danielfyo/solid-principles-dotnet/commit/e8faee61f67c5cd0816c9ab7900cf593a72edef2))
+
 ## [1.0.1](https://github.com/danielfyo/solid-principles-dotnet/compare/v1.0.0...v1.0.1) (2026-11-08)
 
 
