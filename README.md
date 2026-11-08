@@ -1,8 +1,22 @@
 <a id="top"></a>
 
+<p align="center">
+  <img src=".github/assets/social-preview.png" alt="SOLID Principles: a master class from zero to expert, in C#, Python, Go, TypeScript and React" width="100%">
+</p>
+
 # SOLID Principles — A Master Class from Zero to Expert
 
 [![CI](https://github.com/danielfyo/solid-principles-dotnet/actions/workflows/ci.yml/badge.svg)](https://github.com/danielfyo/solid-principles-dotnet/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/danielfyo/solid-principles-dotnet/actions/workflows/codeql.yml/badge.svg)](https://github.com/danielfyo/solid-principles-dotnet/actions/workflows/codeql.yml)
+[![Latest release](https://img.shields.io/github/v/release/danielfyo/solid-principles-dotnet?sort=semver)](https://github.com/danielfyo/solid-principles-dotnet/releases)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-fe5196.svg?logo=conventionalcommits&logoColor=white)](https://www.conventionalcommits.org/en/v1.0.0/)
+
+![.NET 8](https://img.shields.io/badge/.NET-8-512BD4?logo=dotnet&logoColor=white)
+![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
+![Go 1.22](https://img.shields.io/badge/Go-1.22-00ADD8?logo=go&logoColor=white)
+![TypeScript 5](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
+![React 18](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)
 
 > **One e-commerce domain. Five principles. Five languages. Every example runnable and tested.**
 >
@@ -60,6 +74,9 @@
 - [Running the code](#running)
 - [Repository structure](#structure)
 - [Further reading](#reading)
+- [Contributing](#contributing)
+- [License](#license)
+- [About the author](#author)
 
 ---
 
@@ -6887,8 +6904,18 @@ python3 scripts/sync_readme.py --check  # what CI runs
 ```text
 .
 ├── README.md                     ← this master class
+├── CHANGELOG.md                  ← generated from Conventional Commits by release-please
+├── CONTRIBUTING.md               ← how to contribute (equivalence rules, checks, commits)
+├── CODE_OF_CONDUCT.md · SECURITY.md · LICENSE (MIT)
 ├── scripts/sync_readme.py        ← keeps README code identical to the tested sources
-├── .github/workflows/ci.yml      ← builds and tests all five projects
+├── .github/
+│   ├── workflows/ci.yml          ← builds, tests and reports coverage for all five projects
+│   ├── workflows/codeql.yml      ← security and quality scanning
+│   ├── workflows/pr-title.yml    ← enforces Conventional Commit PR titles
+│   ├── workflows/release-please.yml ← versioning, changelog and GitHub Releases
+│   ├── dependabot.yml            ← weekly dependency updates for every toolchain
+│   └── ISSUE_TEMPLATE/ · pull_request_template.md · CODEOWNERS
+├── .editorconfig · .gitattributes ← consistent formatting and LF line endings
 ├── .gitignore                    ← shared rules (OS, editors, secrets, logs)
 ├── dotnet/
 │   ├── .gitignore                ← .NET / Visual Studio / Rider
@@ -6924,6 +6951,41 @@ python3 scripts/sync_readme.py --check  # what CI runs
 - Erich Gamma, Richard Helm, Ralph Johnson, John Vlissides — *Design Patterns: Elements of Reusable Object-Oriented Software* (1994)
 - Mark Seemann & Steven van Deursen — *Dependency Injection Principles, Practices, and Patterns* (2019)
 - Alistair Cockburn — *Hexagonal Architecture* (Ports and Adapters, 2005)
+
+<a id="contributing"></a>
+
+## 🤝 Contributing
+
+Contributions are welcome — clearer explanations, new exercises or better examples. Please read
+[CONTRIBUTING.md](CONTRIBUTING.md) first: every example must stay equivalent across the five languages,
+commits follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/), and CI must be green.
+Security issues: see [SECURITY.md](SECURITY.md).
+
+### How this repository is run
+
+The repository itself applies the practices it teaches:
+
+| Practice | How |
+| --- | --- |
+| **Quality gates** | CI builds and tests five toolchains, enforces strict typing, linters and formatters, and publishes coverage on every pull request. |
+| **Security** | CodeQL scanning, Dependabot updates, least-privilege workflow permissions and a private vulnerability reporting policy. |
+| **Traceable history** | Conventional Commits, enforced on pull request titles; signed commits on a protected `main`. |
+| **Automated releases** | release-please derives the next version and the [CHANGELOG](CHANGELOG.md) from the commit history. |
+| **Docs as code** | The README's code blocks are generated from the tested sources and verified in CI. |
+
+<a id="license"></a>
+
+## 📄 License
+
+Released under the [MIT License](LICENSE).
+
+<a id="author"></a>
+
+## 👤 About the author
+
+Created and maintained by **Daniel F Yepes O** ([@danielfyo](https://github.com/danielfyo)).
+
+If this master class helped you, consider giving it a ⭐ and sharing it with your team.
 
 ---
 

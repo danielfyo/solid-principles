@@ -2,7 +2,15 @@ name: CI
 
 on:
   push:
+    branches: [main]
   pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   dotnet:
@@ -12,7 +20,12 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with: { dotnet-version: "8.0.x" }
-      - run: dotnet test --configuration Release
+      - run: dotnet test --configuration Release --collect:"XPlat Code Coverage" --results-directory coverage
+      - name: Coverage summary
+        run: |
+          dotnet tool install --global dotnet-reportgenerator-globaltool
+          reportgenerator -reports:"coverage/**/coverage.cobertura.xml" -targetdir:coverage/report -reporttypes:MarkdownSummaryGithub
+          { echo "## .NET coverage"; cat coverage/report/SummaryGithub.md; } >> "$GITHUB_STEP_SUMMARY"
 
   python:
     runs-on: ubuntu-latest
@@ -24,7 +37,10 @@ jobs:
       - run: pip install -e ".[dev]"
       - run: ruff check . && ruff format --check .
       - run: mypy
-      - run: pytest
+      - run: pytest --cov
+      - name: Coverage summary
+        run: |
+          { echo "## Python coverage"; coverage report --format=markdown; } >> "$GITHUB_STEP_SUMMARY"
 
   go:
     runs-on: ubuntu-latest
@@ -35,7 +51,10 @@ jobs:
         with: { go-version: "1.22" }
       - run: test -z "$(gofmt -l .)"
       - run: go vet ./...
-      - run: go test ./...
+      - run: go test -coverpkg=./... -coverprofile=coverage.out ./...
+      - name: Coverage summary
+        run: |
+          { echo "## Go coverage"; echo '```'; go tool cover -func=coverage.out; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
 
   typescript:
     runs-on: ubuntu-latest
@@ -43,10 +62,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: "22" }
+        with: { node-version: "22", cache: npm, cache-dependency-path: typescript/package-lock.json }
       - run: npm ci
       - run: npm run typecheck
-      - run: npm test
+      - run: npm run coverage
+      - name: Coverage summary
+        run: |
+          { echo "## TypeScript coverage"; echo '```'; cat coverage/summary.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
 
   react:
     runs-on: ubuntu-latest
@@ -54,11 +76,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: "22" }
+        with: { node-version: "22", cache: npm, cache-dependency-path: react/package-lock.json }
       - run: npm ci
       - run: npm run typecheck
-      - run: npm test
+      - run: npm run coverage
       - run: npm run build
+      - name: Coverage summary
+        run: |
+          { echo "## React coverage"; echo '```'; cat coverage/summary.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
 
   readme:
     runs-on: ubuntu-latest
