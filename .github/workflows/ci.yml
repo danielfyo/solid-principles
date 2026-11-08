@@ -17,8 +17,8 @@ jobs:
     runs-on: ubuntu-latest
     defaults: { run: { working-directory: dotnet } }
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
         with: { dotnet-version: "8.0.x" }
       - run: dotnet test --configuration Release --collect:"XPlat Code Coverage" --results-directory coverage
       - name: Coverage summary
@@ -31,8 +31,8 @@ jobs:
     runs-on: ubuntu-latest
     defaults: { run: { working-directory: python } }
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with: { python-version: "3.12" }
       - run: pip install -e ".[dev]"
       - run: ruff check . && ruff format --check .
@@ -46,8 +46,8 @@ jobs:
     runs-on: ubuntu-latest
     defaults: { run: { working-directory: go } }
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with: { go-version: "1.22" }
       - run: test -z "$(gofmt -l .)"
       - run: go vet ./...
@@ -60,8 +60,8 @@ jobs:
     runs-on: ubuntu-latest
     defaults: { run: { working-directory: typescript } }
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with: { node-version: "22", cache: npm, cache-dependency-path: typescript/package-lock.json }
       - run: npm ci
       - run: npm run typecheck
@@ -74,8 +74,8 @@ jobs:
     runs-on: ubuntu-latest
     defaults: { run: { working-directory: react } }
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with: { node-version: "22", cache: npm, cache-dependency-path: react/package-lock.json }
       - run: npm ci
       - run: npm run typecheck
@@ -88,5 +88,5 @@ jobs:
   readme:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: python3 scripts/sync_readme.py --check
