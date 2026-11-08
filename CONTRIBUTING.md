@@ -5,8 +5,8 @@ typo fixes, clearer explanations, new exercises, or better examples.
 
 ## Ground rules
 
-- **Equivalence across languages.** Every example exists in C#, Python, Go, TypeScript and React.
-  A change to one example must be mirrored in the other four, with equivalent tests.
+- **Equivalence across languages.** Every example exists in C#, Python, Go, TypeScript, React and Angular.
+  A change to one example must be mirrored in the other five, with equivalent tests.
 - **Bad and good versions.** Each principle shows a ❌ `bad` and a ✅ `good` version. Tests prove both
   behave the same and show what the good design makes possible.
 - **The README is generated from the code.** Never edit code blocks in `README.md` by hand; edit the
@@ -20,7 +20,7 @@ typo fixes, clearer explanations, new exercises, or better examples.
 | .NET SDK | 8.0 |
 | Python | 3.12+ |
 | Go | 1.22+ |
-| Node.js | 22 |
+| Node.js | 22.22+ (required by Angular 22) |
 
 ## Running the checks
 
@@ -41,6 +41,9 @@ cd typescript && npm ci && npm run typecheck && npm test
 
 # React
 cd react && npm ci && npm run typecheck && npm test && npm run build
+
+# Angular
+cd angular && npm ci && npm run typecheck && npm test && npm run build
 
 # README snippets
 python3 scripts/sync_readme.py --check
@@ -70,7 +73,7 @@ docs: clarify the difference between DIP and dependency injection
 | `test`, `refactor`, `perf`, `style` | code changes without new behaviour | none |
 | `build`, `ci`, `chore` | tooling, dependencies, pipelines | none |
 
-Useful scopes: `dotnet`, `python`, `go`, `typescript`, `react`, `readme`, `ci`.
+Useful scopes: `dotnet`, `python`, `go`, `typescript`, `react`, `angular`, `readme`, `ci`.
 Add `!` after the type (`feat!:`) for breaking changes.
 
 ## Pull request process
@@ -78,7 +81,7 @@ Add `!` after the type (`feat!:`) for breaking changes.
 Nobody pushes to `main` directly, maintainers included: every change arrives through a pull request.
 
 1. **Fork** the repository and create a branch from `main` (`feat/<topic>`, `fix/<topic>`, `docs/<topic>`).
-2. Make your change in all five languages, with tests, and run the checks above.
+2. Make your change in all six languages, with tests, and run the checks above.
 3. Open a pull request from your fork using the template. Its title must be a Conventional Commit.
 4. **Workflow approval.** For security, GitHub Actions do not run on pull requests from outside
    contributors until a maintainer approves them. Expect a short wait before CI starts.

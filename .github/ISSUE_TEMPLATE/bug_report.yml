@@ -7,7 +7,7 @@ body:
     id: area
     attributes:
       label: Area
-      options: [README / explanation, C# (.NET), Python, Go, TypeScript, React, CI / tooling]
+      options: [README / explanation, C# (.NET), Python, Go, TypeScript, React, Angular, CI / tooling]
     validations:
       required: true
   - type: dropdown

@@ -1,7 +1,7 @@
 <a id="top"></a>
 
 <p align="center">
-  <img src=".github/assets/social-preview.png" alt="SOLID Principles: a master class from zero to expert, in C#, Python, Go, TypeScript and React" width="100%">
+  <img src=".github/assets/social-preview.png" alt="SOLID Principles: a master class from zero to expert, in C#, Python, Go, TypeScript, React and Angular" width="100%">
 </p>
 
 # SOLID Principles — A Master Class from Zero to Expert
@@ -18,12 +18,13 @@
 ![Go 1.22](https://img.shields.io/badge/Go-1.22-00ADD8?logo=go&logoColor=white)
 ![TypeScript 7](https://img.shields.io/badge/TypeScript-7-3178C6?logo=typescript&logoColor=white)
 ![React 19](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
+![Angular 22](https://img.shields.io/badge/Angular-22-DD0031?logo=angular&logoColor=white)
 
-> **One e-commerce domain. Five principles. Five languages. Every example runnable and tested.**
+> **One e-commerce domain. Five principles. Six languages and frameworks. Every example runnable and tested.**
 >
 > This guide takes you from "I've heard the acronym" to "I can explain the trade-offs in a design review
 > and refactor a legacy codebase safely". Every concept is shown as a **❌ problem** and a **✅ solution**,
-> written equivalently in **C# (.NET 8)**, **Python 3.12**, **Go 1.22**, **TypeScript 7** and **React 19**.
+> written equivalently in **C# (.NET 8)**, **Python 3.12**, **Go 1.22**, **TypeScript 7**, **React 19** and **Angular 22**.
 
 | Language | Folder | Tests | Run |
 | --- | --- | --- | --- |
@@ -32,6 +33,7 @@
 | 🐹 Go 1.22 | [`go/`](go) | `go test` | `cd go && go test ./...` |
 | 🔷 TypeScript 7 | [`typescript/`](typescript) | Vitest | `cd typescript && npm ci && npm test` |
 | ⚛️ React 19 | [`react/`](react) | Vitest + Testing Library | `cd react && npm ci && npm test` |
+| 🅰️ Angular 22 | [`angular/`](angular) | Vitest + Angular TestBed | `cd angular && npm ci && npm test` |
 
 > [!TIP]
 > The code blocks in this README are **generated from the real source files** by
@@ -99,9 +101,9 @@ Every principle follows the same structure, so you can always find your way:
 2. **In plain words** — what it actually means.
 3. **Analogy** — a non-software picture to remember it.
 4. **How to spot a violation** — smells you can see in a code review.
-5. **❌ The problem** — real code, five languages.
+5. **❌ The problem** — real code, six languages.
 6. **🔧 Refactoring step by step** — how to get from ❌ to ✅.
-7. **✅ The solution** — real code, five languages.
+7. **✅ The solution** — real code, six languages.
 8. **🧪 Proving it with tests** — what became possible.
 9. **Benefits / Pitfalls / Language notes / Checklist / Level up.**
 
@@ -209,6 +211,8 @@ To make comparison easy, **every principle uses the same business domain** — a
 | **D** | Checkout | `CheckoutService` does `new Stripe()` and `new Smtp()` | It depends on `PaymentGateway`/`CustomerNotifier` abstractions it owns; adapters plug in |
 
 In React, the same ideas are shown the React way: hooks and pure functions (S), component registries (O), substitutable button components (L), narrow props (I) and services injected through context (D).
+
+In Angular, they are shown with the framework's own tools: an injectable data service, pure functions, pipes and presentational components (S), multi-providers rendered with `NgComponentOutlet` (O), attribute-selector components on native `<button>` elements (L), narrow signal `input()`s (I) and Angular's dependency injection with abstract-class tokens and `app.config.ts` as the composition root (D).
 
 > [!NOTE]
 > **Money representation is idiomatic per language**: `decimal` in C#, `Decimal` in Python and integer **cents** in Go, TypeScript and React. Never use binary floating point for money.
@@ -600,6 +604,89 @@ export function OrderSummary({ orderId }: { orderId: string }) {
       </p>
     </section>
   );
+}
+```
+<!-- /snippet -->
+
+</details>
+<details>
+<summary><b>🅰️ Angular 22 + TypeScript</b> — <code>angular/src/app/srp/types.ts</code>, <code>angular/src/app/srp/bad/order-summary.component.ts</code></summary>
+
+<!-- snippet: angular/src/app/srp/types.ts, angular/src/app/srp/bad/order-summary.component.ts -->
+```typescript
+// ── angular/src/app/srp/types.ts ──
+import { Cents } from '../shared/money';
+
+export interface OrderLine {
+  readonly sku: string;
+  readonly name: string;
+  readonly unitPrice: Cents;
+  readonly quantity: number;
+}
+
+export interface Order {
+  readonly id: string;
+  readonly lines: readonly OrderLine[];
+}
+
+// ── angular/src/app/srp/bad/order-summary.component.ts ──
+import { HttpClient } from '@angular/common/http';
+import { ChangeDetectionStrategy, Component, OnInit, inject, input, signal } from '@angular/core';
+import { Order } from '../types';
+
+/**
+ * ❌ SRP violation: this component fetches data, manages loading/error state,
+ * computes taxes, formats currency AND renders markup. A change to the API,
+ * the tax rules, the locale or the design all land in the same file.
+ */
+@Component({
+  selector: 'app-bad-order-summary',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    @if (error()) {
+      <p role="alert">Could not load order: {{ error() }}</p>
+    } @else if (order(); as order) {
+      <section aria-label="Order summary">
+        <h2>Order {{ order.id }}</h2>
+        <ul>
+          @for (line of order.lines; track line.sku) {
+            <li>{{ line.quantity }} × {{ line.name }} — {{ format(line.unitPrice * line.quantity) }}</li>
+          }
+        </ul>
+        <p>Subtotal: {{ format(subtotal(order)) }}</p>
+        <p>Tax: {{ format(tax(order)) }}</p>
+        <p><strong>Total: {{ format(subtotal(order) + tax(order)) }}</strong></p>
+      </section>
+    } @else {
+      <p>Loading…</p>
+    }
+  `,
+})
+export class BadOrderSummaryComponent implements OnInit {
+  readonly orderId = input.required<string>();
+
+  private readonly http = inject(HttpClient);
+  protected readonly order = signal<Order | null>(null);
+  protected readonly error = signal<string | null>(null);
+
+  ngOnInit(): void {
+    this.http.get<Order>(`/api/orders/${this.orderId()}`).subscribe({
+      next: (order) => this.order.set(order),
+      error: (e: unknown) => this.error.set(e instanceof Error ? e.message : String(e)),
+    });
+  }
+
+  protected subtotal(order: Order): number {
+    return order.lines.reduce((sum, l) => sum + l.unitPrice * l.quantity, 0);
+  }
+
+  protected tax(order: Order): number {
+    return Math.round(this.subtotal(order) * 0.21);
+  }
+
+  protected format(cents: number): string {
+    return new Intl.NumberFormat('en-IE', { style: 'currency', currency: 'EUR' }).format(cents / 100);
+  }
 }
 ```
 <!-- /snippet -->
@@ -1245,6 +1332,130 @@ export function OrderSummary({ orderId, loadOrder }: OrderSummaryProps) {
 <!-- /snippet -->
 
 </details>
+<details>
+<summary><b>🅰️ Angular 22 + TypeScript</b> — <code>angular/src/app/shared/money.pipe.ts</code>, <code>angular/src/app/srp/good/order-totals.ts</code>, <code>angular/src/app/srp/good/order-api.ts</code>, <code>angular/src/app/srp/good/order-summary-view.component.ts</code>, <code>angular/src/app/srp/good/order-summary.component.ts</code></summary>
+
+<!-- snippet: angular/src/app/shared/money.pipe.ts, angular/src/app/srp/good/order-totals.ts, angular/src/app/srp/good/order-api.ts, angular/src/app/srp/good/order-summary-view.component.ts, angular/src/app/srp/good/order-summary.component.ts -->
+```typescript
+// ── angular/src/app/shared/money.pipe.ts ──
+import { Pipe, PipeTransform } from '@angular/core';
+import { Cents, formatMoney } from './money';
+
+/** Single reason to change: how money is displayed. Usage: {{ total | money }} */
+@Pipe({ name: 'money' })
+export class MoneyPipe implements PipeTransform {
+  transform(amount: Cents): string {
+    return formatMoney(amount);
+  }
+}
+
+// ── angular/src/app/srp/good/order-totals.ts ──
+import { Cents } from '../../shared/money';
+import { Order } from '../types';
+
+export interface OrderTotals {
+  readonly subtotal: Cents;
+  readonly tax: Cents;
+  readonly total: Cents;
+}
+
+/** Single reason to change: pricing rules. A pure function, trivial to test. */
+export function calculateTotals(order: Order, taxRate: number): OrderTotals {
+  const subtotal = order.lines.reduce((sum, line) => sum + line.unitPrice * line.quantity, 0);
+  const tax = Math.round(subtotal * taxRate);
+  return { subtotal, tax, total: subtotal + tax };
+}
+
+// ── angular/src/app/srp/good/order-api.ts ──
+import { HttpClient } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
+import { Observable } from 'rxjs';
+import { Order } from '../types';
+
+/** Single reason to change: the HTTP contract with the backend. */
+@Injectable({ providedIn: 'root' })
+export class OrderApi {
+  private readonly http = inject(HttpClient);
+
+  load(orderId: string): Observable<Order> {
+    return this.http.get<Order>(`/api/orders/${encodeURIComponent(orderId)}`);
+  }
+}
+
+// ── angular/src/app/srp/good/order-summary-view.component.ts ──
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { MoneyPipe } from '../../shared/money.pipe';
+import { Order } from '../types';
+import { OrderTotals } from './order-totals';
+
+/** Single reason to change: how the summary looks. Pure: inputs in, markup out. */
+@Component({
+  selector: 'app-order-summary-view',
+  imports: [MoneyPipe],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <section aria-label="Order summary">
+      <h2>Order {{ order().id }}</h2>
+      <ul>
+        @for (line of order().lines; track line.sku) {
+          <li>{{ line.quantity }} × {{ line.name }} — {{ line.unitPrice * line.quantity | money }}</li>
+        }
+      </ul>
+      <p>Subtotal: {{ totals().subtotal | money }}</p>
+      <p>Tax: {{ totals().tax | money }}</p>
+      <p><strong>Total: {{ totals().total | money }}</strong></p>
+    </section>
+  `,
+})
+export class OrderSummaryViewComponent {
+  readonly order = input.required<Order>();
+  readonly totals = input.required<OrderTotals>();
+}
+
+// ── angular/src/app/srp/good/order-summary.component.ts ──
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { rxResource } from '@angular/core/rxjs-interop';
+import { OrderApi } from './order-api';
+import { OrderSummaryViewComponent } from './order-summary-view.component';
+import { calculateTotals } from './order-totals';
+
+const TAX_RATE = 0.21;
+
+/** ✅ A thin container: wires the data service, the pricing function and the view. */
+@Component({
+  selector: 'app-order-summary',
+  imports: [OrderSummaryViewComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    @if (order.error(); as error) {
+      <p role="alert">Could not load order: {{ errorMessage(error) }}</p>
+    } @else if (totals(); as totals) {
+      <app-order-summary-view [order]="order.value()!" [totals]="totals" />
+    } @else {
+      <p>Loading…</p>
+    }
+  `,
+})
+export class OrderSummaryComponent {
+  readonly orderId = input.required<string>();
+
+  private readonly api = inject(OrderApi);
+  protected readonly order = rxResource({
+    params: () => this.orderId(),
+    stream: ({ params: orderId }) => this.api.load(orderId),
+  });
+  protected readonly totals = computed(() =>
+    this.order.hasValue() ? calculateTotals(this.order.value(), TAX_RATE) : null,
+  );
+
+  protected errorMessage(error: unknown): string {
+    return error instanceof Error ? error.message : String(error);
+  }
+}
+```
+<!-- /snippet -->
+
+</details>
 
 ### 🧪 Proving it with tests
 
@@ -1629,6 +1840,79 @@ describe("SRP - the solution", () => {
 <!-- /snippet -->
 
 </details>
+<details>
+<summary><b>🅰️ Angular 22 + TypeScript</b> — <code>angular/src/app/srp/srp.spec.ts</code></summary>
+
+<!-- snippet: angular/src/app/srp/srp.spec.ts -->
+```typescript
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { TestBed } from '@angular/core/testing';
+import { of, throwError } from 'rxjs';
+import { BadOrderSummaryComponent } from './bad/order-summary.component';
+import { OrderApi } from './good/order-api';
+import { OrderSummaryViewComponent } from './good/order-summary-view.component';
+import { OrderSummaryComponent } from './good/order-summary.component';
+import { calculateTotals } from './good/order-totals';
+import { Order } from './types';
+
+const order: Order = { id: 'A-1', lines: [{ sku: 'BOOK', name: 'Clean Code', unitPrice: 1000, quantity: 2 }] };
+
+const text = (el: HTMLElement) => el.textContent?.replace(/\s+/g, ' ').trim() ?? '';
+
+describe('SRP - the problem', () => {
+  it('can only be tested by faking the HTTP layer behind the component', async () => {
+    TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting()] });
+    const fixture = TestBed.createComponent(BadOrderSummaryComponent);
+    fixture.componentRef.setInput('orderId', 'A-1');
+    fixture.detectChanges();
+
+    TestBed.inject(HttpTestingController).expectOne('/api/orders/A-1').flush(order);
+    await fixture.whenStable();
+
+    expect(text(fixture.nativeElement)).toContain('Total: €24.20');
+  });
+});
+
+describe('SRP - the solution', () => {
+  it('pricing is a pure function', () => {
+    expect(calculateTotals(order, 0.21)).toEqual({ subtotal: 2000, tax: 420, total: 2420 });
+  });
+
+  it('the view renders from inputs alone', async () => {
+    const fixture = TestBed.createComponent(OrderSummaryViewComponent);
+    fixture.componentRef.setInput('order', order);
+    fixture.componentRef.setInput('totals', { subtotal: 2000, tax: 420, total: 2420 });
+    await fixture.whenStable();
+
+    expect(text(fixture.nativeElement)).toContain('2 × Clean Code — €20.00');
+    expect(text(fixture.nativeElement)).toContain('Total: €24.20');
+  });
+
+  it('the container composes the pieces with an injected data service', async () => {
+    TestBed.configureTestingModule({ providers: [{ provide: OrderApi, useValue: { load: () => of(order) } }] });
+    const fixture = TestBed.createComponent(OrderSummaryComponent);
+    fixture.componentRef.setInput('orderId', 'A-1');
+    await fixture.whenStable();
+
+    expect(text(fixture.nativeElement)).toContain('Total: €24.20');
+  });
+
+  it('shows loading errors', async () => {
+    TestBed.configureTestingModule({
+      providers: [{ provide: OrderApi, useValue: { load: () => throwError(() => new Error('offline')) } }],
+    });
+    const fixture = TestBed.createComponent(OrderSummaryComponent);
+    fixture.componentRef.setInput('orderId', 'A-1');
+    await fixture.whenStable();
+
+    expect(fixture.nativeElement.querySelector('[role="alert"]').textContent).toContain('offline');
+  });
+});
+```
+<!-- /snippet -->
+
+</details>
 
 ### ✅ Benefits
 
@@ -1653,6 +1937,7 @@ describe("SRP - the solution", () => {
 | **Go** | Packages are the unit of cohesion: `order/pricing`, `order/storage`… Prefer small structs and plain functions. |
 | **TypeScript** | Pure functions + classes only where state or polymorphism is needed. Use `readonly` interfaces for data. |
 | **React** | Split **data fetching** (custom hook), **business logic** (pure functions), **formatting** (utils) and **presentation** (dumb components). A component that fetches, computes and renders has three actors. |
+| **Angular** | Split **data access** (an `@Injectable` service), **async state** (`rxResource` and signals in a thin container), **business logic** (pure functions), **formatting** (pipes) and **presentation** (input-only components). |
 
 ### ☑️ Checklist
 
@@ -1925,6 +2210,45 @@ export function PaymentOptions() {
       {renderForm()}
     </fieldset>
   );
+}
+```
+<!-- /snippet -->
+
+</details>
+<details>
+<summary><b>🅰️ Angular 22 + TypeScript</b> — <code>angular/src/app/ocp/bad/payment-options.component.ts</code></summary>
+
+<!-- snippet: angular/src/app/ocp/bad/payment-options.component.ts -->
+```typescript
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+
+type PaymentMethodId = 'card' | 'paypal';
+
+/**
+ * ❌ OCP violation: supporting a new payment method (Bizum, Apple Pay...) means
+ * editing this component: the type union, the radio list AND the @switch.
+ */
+@Component({
+  selector: 'app-bad-payment-options',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <fieldset>
+      <legend>Payment method</legend>
+      <label><input type="radio" [checked]="selected() === 'card'" (change)="selected.set('card')" /> Card</label>
+      <label><input type="radio" [checked]="selected() === 'paypal'" (change)="selected.set('paypal')" /> PayPal</label>
+      @switch (selected()) {
+        @case ('card') {
+          <label>Card number <input name="cardNumber" inputmode="numeric" /></label>
+        }
+        @case ('paypal') {
+          <p>You will be redirected to PayPal.</p>
+        }
+      }
+    </fieldset>
+  `,
+})
+export class BadPaymentOptionsComponent {
+  protected readonly selected = signal<PaymentMethodId>('card');
 }
 ```
 <!-- /snippet -->
@@ -2351,6 +2675,92 @@ export const defaultPaymentOptions: readonly PaymentOption[] = [
 <!-- /snippet -->
 
 </details>
+<details>
+<summary><b>🅰️ Angular 22 + TypeScript</b> — <code>angular/src/app/ocp/good/payment-option.ts</code>, <code>angular/src/app/ocp/good/payment-options.component.ts</code>, <code>angular/src/app/ocp/good/payment-registry.ts</code></summary>
+
+<!-- snippet: angular/src/app/ocp/good/payment-option.ts, angular/src/app/ocp/good/payment-options.component.ts, angular/src/app/ocp/good/payment-registry.ts -->
+```typescript
+// ── angular/src/app/ocp/good/payment-option.ts ──
+import { InjectionToken, Provider, Type } from '@angular/core';
+
+/** The extension point: a payment option is data + a component. */
+export interface PaymentOption {
+  readonly id: string;
+  readonly label: string;
+  readonly component: Type<unknown>;
+}
+
+/** Multi-provider token: every provided option is collected, in registration order. */
+export const PAYMENT_OPTIONS = new InjectionToken<readonly PaymentOption[]>('PAYMENT_OPTIONS');
+
+/** Registers a payment option. Adding a method = adding a provider, never editing the component. */
+export const providePaymentOption = (option: PaymentOption): Provider => ({
+  provide: PAYMENT_OPTIONS,
+  useValue: option,
+  multi: true,
+});
+
+// ── angular/src/app/ocp/good/payment-options.component.ts ──
+import { NgComponentOutlet } from '@angular/common';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { PAYMENT_OPTIONS } from './payment-option';
+
+/**
+ * ✅ Closed for modification: it renders whatever options are registered in DI.
+ * Open for extension: register a new PaymentOption, never edit this file.
+ */
+@Component({
+  selector: 'app-payment-options',
+  imports: [NgComponentOutlet],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <fieldset>
+      <legend>Payment method</legend>
+      @for (option of options; track option.id) {
+        <label>
+          <input type="radio" name="payment-method" [checked]="option.id === selectedId()" (change)="selectedId.set(option.id)" />
+          {{ option.label }}
+        </label>
+      }
+      @if (selected(); as option) {
+        <ng-container *ngComponentOutlet="option.component" />
+      }
+    </fieldset>
+  `,
+})
+export class PaymentOptionsComponent {
+  protected readonly options = inject(PAYMENT_OPTIONS);
+  protected readonly selectedId = signal(this.options[0]?.id);
+  protected readonly selected = computed(() => this.options.find((option) => option.id === this.selectedId()));
+}
+
+// ── angular/src/app/ocp/good/payment-registry.ts ──
+import { ChangeDetectionStrategy, Component, Provider } from '@angular/core';
+import { providePaymentOption } from './payment-option';
+
+@Component({
+  selector: 'app-card-form',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `<label>Card number <input name="cardNumber" inputmode="numeric" /></label>`,
+})
+export class CardFormComponent {}
+
+@Component({
+  selector: 'app-paypal-form',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `<p>You will be redirected to PayPal.</p>`,
+})
+export class PayPalFormComponent {}
+
+/** The registry. Each feature can contribute its own option from its own providers. */
+export const defaultPaymentOptions: Provider[] = [
+  providePaymentOption({ id: 'card', label: 'Card', component: CardFormComponent }),
+  providePaymentOption({ id: 'paypal', label: 'PayPal', component: PayPalFormComponent }),
+];
+```
+<!-- /snippet -->
+
+</details>
 
 ### 🧪 Proving it with tests
 
@@ -2631,6 +3041,65 @@ describe("OCP", () => {
 <!-- /snippet -->
 
 </details>
+<details>
+<summary><b>🅰️ Angular 22 + TypeScript</b> — <code>angular/src/app/ocp/ocp.spec.ts</code></summary>
+
+<!-- snippet: angular/src/app/ocp/ocp.spec.ts -->
+```typescript
+import { Component, Type } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { BadPaymentOptionsComponent } from './bad/payment-options.component';
+import { providePaymentOption } from './good/payment-option';
+import { PaymentOptionsComponent } from './good/payment-options.component';
+import { defaultPaymentOptions } from './good/payment-registry';
+
+const labelled = (fixture: ComponentFixture<unknown>, text: string): HTMLInputElement => {
+  const label = [...(fixture.nativeElement as HTMLElement).querySelectorAll('label')].find((l) =>
+    l.textContent?.includes(text),
+  );
+  return label!.querySelector('input')!;
+};
+
+async function selectPayPal(fixture: ComponentFixture<unknown>): Promise<void> {
+  labelled(fixture, 'PayPal').click();
+  await fixture.whenStable();
+}
+
+describe('OCP', () => {
+  it.each<[string, Type<unknown>]>([
+    ['bad', BadPaymentOptionsComponent],
+    ['good', PaymentOptionsComponent],
+  ])('%s version shows the card form and switches to PayPal', async (_name, component) => {
+    TestBed.configureTestingModule({ providers: defaultPaymentOptions });
+    const fixture = TestBed.createComponent(component);
+    await fixture.whenStable();
+    expect(labelled(fixture, 'Card number')).toBeTruthy();
+
+    await selectPayPal(fixture);
+
+    expect(fixture.nativeElement.textContent).toContain('You will be redirected to PayPal.');
+  });
+
+  it('a new payment method is added without touching PaymentOptionsComponent', async () => {
+    @Component({ selector: 'app-bizum-form', template: `<p>Enter your phone number.</p>` })
+    class BizumFormComponent {}
+
+    TestBed.configureTestingModule({
+      providers: [...defaultPaymentOptions, providePaymentOption({ id: 'bizum', label: 'Bizum', component: BizumFormComponent })],
+    });
+    const fixture = TestBed.createComponent(PaymentOptionsComponent);
+    await fixture.whenStable();
+
+    labelled(fixture, 'Bizum').click();
+    await fixture.whenStable();
+
+    expect(fixture.nativeElement.textContent).toContain('Enter your phone number.');
+  });
+});
+```
+<!-- /snippet -->
+
+</details>
 
 ### ✅ Benefits
 
@@ -2655,6 +3124,7 @@ describe("OCP", () => {
 | **Go** | Small interface + the **func adapter** idiom (`DiscountPolicyFunc`, like `http.HandlerFunc`), so a closure can be a policy. |
 | **TypeScript** | Interface or simply an object literal `{ discountFor: (cart) => … }` thanks to structural typing. |
 | **React** | **Composition**: `children`, render props, component registries (`{ id, label, Form }`). A component that receives *what to render* is closed for modification and open for extension. |
+| **Angular** | **Multi-providers**: register extensions under an `InjectionToken` (`providePaymentOption(...)`) and render them with `NgComponentOutlet` or content projection. New features add providers; the component never changes. |
 
 ### ☑️ Checklist
 
@@ -3039,6 +3509,31 @@ export function IconButton({ onClick, children, icon }: ButtonProps & { icon: Re
       {icon} {children}
     </div>
   );
+}
+```
+<!-- /snippet -->
+
+</details>
+<details>
+<summary><b>🅰️ Angular 22 + TypeScript</b> — <code>angular/src/app/lsp/bad/icon-button.component.ts</code></summary>
+
+<!-- snippet: angular/src/app/lsp/bad/icon-button.component.ts -->
+```typescript
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+
+/**
+ * ❌ LSP violation: it accepts the same inputs as a button (`disabled`), so callers
+ * expect a drop-in replacement, but it renders a <div>: `disabled` is ignored,
+ * it is not focusable and keyboard users cannot activate it.
+ */
+@Component({
+  selector: 'app-bad-icon-button',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `<div class="icon-button">{{ icon() }} <ng-content /></div>`,
+})
+export class BadIconButtonComponent {
+  readonly icon = input.required<string>();
+  readonly disabled = input(false);
 }
 ```
 <!-- /snippet -->
@@ -3560,10 +4055,57 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(functio
 <!-- /snippet -->
 
 </details>
+<details>
+<summary><b>🅰️ Angular 22 + TypeScript</b> — <code>angular/src/app/lsp/good/buttons.ts</code></summary>
+
+<!-- snippet: angular/src/app/lsp/good/buttons.ts -->
+```typescript
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+
+/**
+ * The base contract: a native <button>. Attribute selectors keep the real element, so
+ * every variant inherits `disabled`, focus, keyboard activation, forms and ARIA for free.
+ */
+@Component({
+  selector: 'button[appButton]',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { '[attr.type]': 'type()' },
+  template: `<ng-content />`,
+})
+export class ButtonComponent {
+  readonly type = input<'button' | 'submit' | 'reset'>('button');
+}
+
+/** ✅ Specialises the look, keeps the whole contract. */
+@Component({
+  selector: 'button[appPrimaryButton]',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { class: 'btn-primary', '[attr.type]': 'type()' },
+  template: `<ng-content />`,
+})
+export class PrimaryButtonComponent {
+  readonly type = input<'button' | 'submit' | 'reset'>('button');
+}
+
+/** ✅ Adds an icon, still a real <button>: substitutable anywhere a button is. */
+@Component({
+  selector: 'button[appIconButton]',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { '[attr.type]': 'type()' },
+  template: `<span aria-hidden="true">{{ icon() }}</span> <ng-content />`,
+})
+export class IconButtonComponent {
+  readonly icon = input.required<string>({ alias: 'appIconButton' });
+  readonly type = input<'button' | 'submit' | 'reset'>('button');
+}
+```
+<!-- /snippet -->
+
+</details>
 
 ### 🧪 Proving it with tests — contract tests
 
-This is the most valuable LSP technique: **one suite, run against every implementation**. In xUnit it's `[MemberData]`, in pytest `@pytest.mark.parametrize`, in Go a table of constructors, in Vitest `describe.each`. In React, the same contract suite checks that every button variant is a real `<button>`, honours `disabled`, calls `onClick` and forwards refs.
+This is the most valuable LSP technique: **one suite, run against every implementation**. In xUnit it's `[MemberData]`, in pytest `@pytest.mark.parametrize`, in Go a table of constructors, in Vitest `describe.each`. In React, the same contract suite checks that every button variant is a real `<button>`, honours `disabled`, calls `onClick` and forwards refs; in Angular, `describe.each` runs it against host components for every attribute-selector button.
 
 <details>
 <summary><b>🟣 C# (.NET 8)</b> — <code>dotnet/tests/SolidPrinciples.Tests/LspTests.cs</code></summary>
@@ -3947,6 +4489,112 @@ describe.each(variants)("Button contract: %s", (_name, Variant) => {
 <!-- /snippet -->
 
 </details>
+<details>
+<summary><b>🅰️ Angular 22 + TypeScript</b> — <code>angular/src/app/lsp/lsp.spec.ts</code></summary>
+
+<!-- snippet: angular/src/app/lsp/lsp.spec.ts -->
+```typescript
+import { Component, ElementRef, Type, signal, viewChild } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { BadIconButtonComponent } from './bad/icon-button.component';
+import { ButtonComponent, IconButtonComponent, PrimaryButtonComponent } from './good/buttons';
+
+describe('LSP - the problem', () => {
+  it('a disabled bad icon button still fires click handlers', async () => {
+    @Component({
+      imports: [BadIconButtonComponent],
+      template: `<app-bad-icon-button icon="🛒" [disabled]="true" (click)="clicks = clicks + 1">Add to cart</app-bad-icon-button>`,
+    })
+    class Host {
+      clicks = 0;
+    }
+    const fixture = TestBed.createComponent(Host);
+    await fixture.whenStable();
+
+    (fixture.nativeElement.querySelector('.icon-button') as HTMLElement).click();
+
+    expect(fixture.componentInstance.clicks).toBe(1); // 💥 the caller asked for disabled
+  });
+});
+
+// Contract tests: every variant must behave like a native button.
+interface ButtonHost {
+  readonly clicks: number;
+  readonly disabled: ReturnType<typeof signal<boolean>>;
+  readonly button: () => ElementRef<HTMLButtonElement>;
+}
+
+@Component({
+  imports: [ButtonComponent],
+  template: `<button #b appButton [disabled]="disabled()" (click)="clicks = clicks + 1">Add to cart</button>`,
+})
+class ButtonHostComponent implements ButtonHost {
+  clicks = 0;
+  readonly disabled = signal(false);
+  readonly button = viewChild.required('b', { read: ElementRef<HTMLButtonElement> });
+}
+
+@Component({
+  imports: [PrimaryButtonComponent],
+  template: `<button #b appPrimaryButton [disabled]="disabled()" (click)="clicks = clicks + 1">Add to cart</button>`,
+})
+class PrimaryHostComponent implements ButtonHost {
+  clicks = 0;
+  readonly disabled = signal(false);
+  readonly button = viewChild.required('b', { read: ElementRef<HTMLButtonElement> });
+}
+
+@Component({
+  imports: [IconButtonComponent],
+  template: `<button #b appIconButton="🛒" [disabled]="disabled()" (click)="clicks = clicks + 1">Add to cart</button>`,
+})
+class IconHostComponent implements ButtonHost {
+  clicks = 0;
+  readonly disabled = signal(false);
+  readonly button = viewChild.required('b', { read: ElementRef<HTMLButtonElement> });
+}
+
+describe.each<[string, Type<ButtonHost>]>([
+  ['ButtonComponent', ButtonHostComponent],
+  ['PrimaryButtonComponent', PrimaryHostComponent],
+  ['IconButtonComponent', IconHostComponent],
+])('Button contract: %s', (_name, host) => {
+  async function render(disabled = false) {
+    const fixture = TestBed.createComponent(host);
+    fixture.componentInstance.disabled.set(disabled);
+    await fixture.whenStable();
+    return { fixture, button: fixture.componentInstance.button().nativeElement };
+  }
+
+  it('is a real, accessible button of type "button"', async () => {
+    const { button } = await render();
+
+    expect(button).toBeInstanceOf(HTMLButtonElement);
+    expect(button.type).toBe('button');
+    expect(button.textContent).toContain('Add to cart');
+  });
+
+  it('calls click handlers when enabled', async () => {
+    const { fixture, button } = await render();
+
+    button.click();
+
+    expect(fixture.componentInstance.clicks).toBe(1);
+  });
+
+  it('honours disabled', async () => {
+    const { fixture, button } = await render(true);
+
+    button.click();
+
+    expect(button.disabled).toBe(true);
+    expect(fixture.componentInstance.clicks).toBe(0);
+  });
+});
+```
+<!-- /snippet -->
+
+</details>
 
 ### ✅ Benefits
 
@@ -3970,6 +4618,7 @@ describe.each(variants)("Button contract: %s", (_name, Variant) => {
 | **Go** | No inheritance, but interfaces still carry behavioural contracts (`io.Reader` must not return `n > len(p)`). Use compile-time assertions `var _ Refundable = (*CreditCard)(nil)` and table-driven contract tests. |
 | **TypeScript** | Structural typing checks shape only. Use `@ts-expect-error` in tests to document illegal substitutions; discriminated unions model "can/can't" capabilities well. |
 | **React** | A component that accepts a props type must **honour it**: spread `...rest`, forward `ref`, respect `disabled`, keep the semantic element. Wrapping a `<button>` in a `<div onClick>` breaks keyboard users and every caller's expectations. |
+| **Angular** | Build variants as **attribute-selector components** on the native element (`button[appIconButton]`), so they inherit `disabled`, focus, keyboard activation, forms and ARIA. A `<div (click)>` wrapper that accepts `disabled` and ignores it breaks the contract. |
 
 ### ☑️ Checklist
 
@@ -4343,6 +4992,53 @@ export function CustomerBadge({ order }: { order: Order }) {
       {isVip && " ★ VIP"}
     </span>
   );
+}
+```
+<!-- /snippet -->
+
+</details>
+<details>
+<summary><b>🅰️ Angular 22 + TypeScript</b> — <code>angular/src/app/isp/types.ts</code>, <code>angular/src/app/isp/bad/customer-badge.component.ts</code></summary>
+
+<!-- snippet: angular/src/app/isp/types.ts, angular/src/app/isp/bad/customer-badge.component.ts -->
+```typescript
+// ── angular/src/app/isp/types.ts ──
+import { Cents } from '../shared/money';
+
+/** A rich domain object, as it typically comes from the API. */
+export interface Order {
+  readonly id: string;
+  readonly placedAt: string;
+  readonly customer: {
+    readonly id: string;
+    readonly name: string;
+    readonly email: string;
+    readonly tier: 'regular' | 'premium' | 'vip';
+    readonly addresses: readonly { readonly street: string; readonly city: string }[];
+  };
+  readonly lines: readonly { readonly sku: string; readonly quantity: number; readonly unitPrice: Cents }[];
+  readonly payment: { readonly method: string; readonly status: 'pending' | 'paid' | 'refunded' };
+  readonly total: Cents;
+}
+
+// ── angular/src/app/isp/bad/customer-badge.component.ts ──
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { Order } from '../types';
+
+/**
+ * ❌ ISP violation: it needs a name and a tier, but demands a whole Order.
+ * - It must be re-checked whenever ANY part of Order changes shape.
+ * - It cannot be reused where there is no order (profile page, admin list...).
+ * - Tests and stories must build a full Order fixture.
+ */
+@Component({
+  selector: 'app-bad-customer-badge',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `<span class="badge" [class.badge-vip]="isVip()">{{ order().customer.name }}@if (isVip()) { ★ VIP}</span>`,
+})
+export class BadCustomerBadgeComponent {
+  readonly order = input.required<Order>();
+  protected readonly isVip = computed(() => this.order().customer.tier === 'vip');
 }
 ```
 <!-- /snippet -->
@@ -4826,6 +5522,49 @@ export function OrderHeader({ order }: { order: Pick<Order, "id" | "customer"> }
 <!-- /snippet -->
 
 </details>
+<details>
+<summary><b>🅰️ Angular 22 + TypeScript</b> — <code>angular/src/app/isp/good/customer-badge.component.ts</code>, <code>angular/src/app/isp/good/order-header.component.ts</code></summary>
+
+<!-- snippet: angular/src/app/isp/good/customer-badge.component.ts, angular/src/app/isp/good/order-header.component.ts -->
+```typescript
+// ── angular/src/app/isp/good/customer-badge.component.ts ──
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+
+/** ✅ Inputs are the component's interface: ask only for what you use. */
+@Component({
+  selector: 'app-customer-badge',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `<span class="badge" [class.badge-vip]="isVip()">{{ name() }}@if (isVip()) { ★ VIP}</span>`,
+})
+export class CustomerBadgeComponent {
+  readonly name = input.required<string>();
+  readonly isVip = input(false);
+}
+
+// ── angular/src/app/isp/good/order-header.component.ts ──
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { Order } from '../types';
+import { CustomerBadgeComponent } from './customer-badge.component';
+
+/** The parent that owns the rich object maps it to the narrow inputs. */
+@Component({
+  selector: 'app-order-header',
+  imports: [CustomerBadgeComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <header>
+      <h2>Order {{ order().id }}</h2>
+      <app-customer-badge [name]="order().customer.name" [isVip]="order().customer.tier === 'vip'" />
+    </header>
+  `,
+})
+export class OrderHeaderComponent {
+  readonly order = input.required<Pick<Order, 'id' | 'customer'>>();
+}
+```
+<!-- /snippet -->
+
+</details>
 
 ### 🧪 Proving it with tests
 
@@ -5141,6 +5880,71 @@ describe("ISP", () => {
 <!-- /snippet -->
 
 </details>
+<details>
+<summary><b>🅰️ Angular 22 + TypeScript</b> — <code>angular/src/app/isp/isp.spec.ts</code></summary>
+
+<!-- snippet: angular/src/app/isp/isp.spec.ts -->
+```typescript
+import { TestBed } from '@angular/core/testing';
+import { BadCustomerBadgeComponent } from './bad/customer-badge.component';
+import { CustomerBadgeComponent } from './good/customer-badge.component';
+import { OrderHeaderComponent } from './good/order-header.component';
+import { Order } from './types';
+
+const text = (el: HTMLElement) => el.textContent?.replace(/\s+/g, ' ').trim() ?? '';
+
+describe('ISP', () => {
+  it('the bad badge needs a full Order fixture just to show a name', async () => {
+    const order: Order = {
+      id: 'O-1',
+      placedAt: '2026-03-14T10:00:00Z',
+      customer: { id: 'C-1', name: 'Ana', email: 'ana@example.com', tier: 'vip', addresses: [] },
+      lines: [],
+      payment: { method: 'card', status: 'paid' },
+      total: 0,
+    };
+    const fixture = TestBed.createComponent(BadCustomerBadgeComponent);
+    fixture.componentRef.setInput('order', order);
+    await fixture.whenStable();
+
+    expect(text(fixture.nativeElement)).toBe('Ana ★ VIP');
+  });
+
+  it('the good badge needs only what it shows', async () => {
+    const fixture = TestBed.createComponent(CustomerBadgeComponent);
+    fixture.componentRef.setInput('name', 'Ana');
+    fixture.componentRef.setInput('isVip', true);
+    await fixture.whenStable();
+
+    expect(text(fixture.nativeElement)).toBe('Ana ★ VIP');
+  });
+
+  it('the good badge is reusable outside orders', async () => {
+    const fixture = TestBed.createComponent(CustomerBadgeComponent);
+    fixture.componentRef.setInput('name', 'Luis');
+    await fixture.whenStable();
+
+    const badge: HTMLElement = fixture.nativeElement.querySelector('.badge');
+    expect(text(badge)).toBe('Luis');
+    expect(badge.classList).not.toContain('badge-vip');
+  });
+
+  it('the parent maps the rich object to narrow inputs', async () => {
+    const fixture = TestBed.createComponent(OrderHeaderComponent);
+    fixture.componentRef.setInput('order', {
+      id: 'O-1',
+      customer: { id: 'C-1', name: 'Ana', email: '', tier: 'vip', addresses: [] },
+    });
+    await fixture.whenStable();
+
+    expect(fixture.nativeElement.querySelector('h2').textContent).toContain('Order O-1');
+    expect(text(fixture.nativeElement.querySelector('.badge'))).toBe('Ana ★ VIP');
+  });
+});
+```
+<!-- /snippet -->
+
+</details>
 
 ### ✅ Benefits
 
@@ -5165,6 +5969,7 @@ describe("ISP", () => {
 | **Go** | ISP is the default culture: *"The bigger the interface, the weaker the abstraction"* (Rob Pike). Interfaces are satisfied implicitly, so **consumers define the interfaces they need** (`io.Reader`, `io.Writer`, composed into `io.ReadWriter`). |
 | **TypeScript** | Structural typing lets you use `Pick<T, K>` or tiny interfaces; an object literal stub is a valid implementation. |
 | **React** | **Props are the component's interface.** Ask for `name` and `isVip`, not `order`. This also helps memoisation (`React.memo` compares primitives cheaply) and Storybook. |
+| **Angular** | **Inputs are the component's interface.** Use narrow `input()`s (`name`, `isVip`) instead of a whole `order`. Components become reusable, and `OnPush` change detection compares cheap primitives. |
 
 ### ☑️ Checklist
 
@@ -5511,6 +6316,57 @@ export function CheckoutButton({ email, amount }: { email: string; amount: Cents
       <p role="status">{status}</p>
     </div>
   );
+}
+```
+<!-- /snippet -->
+
+</details>
+<details>
+<summary><b>🅰️ Angular 22 + TypeScript</b> — <code>angular/src/app/dip/bad/stripe-client.ts</code>, <code>angular/src/app/dip/bad/checkout-button.component.ts</code></summary>
+
+<!-- snippet: angular/src/app/dip/bad/stripe-client.ts, angular/src/app/dip/bad/checkout-button.component.ts -->
+```typescript
+// ── angular/src/app/dip/bad/stripe-client.ts ──
+/** Stand-in for a third-party payment SDK, exported as a module singleton. */
+export const stripeClient = {
+  async createCharge(customerEmail: string, amountInCents: number): Promise<string> {
+    // Imagine a real HTTP call here: network, API keys, rate limits...
+    console.log(`[stripe] charging ${amountInCents} cents to ${customerEmail}`);
+    return `ch_${Date.now()}`;
+  },
+};
+
+// ── angular/src/app/dip/bad/checkout-button.component.ts ──
+import { ChangeDetectionStrategy, Component, input, signal } from '@angular/core';
+import { Cents, formatMoney } from '../../shared/money';
+import { stripeClient } from './stripe-client';
+
+/**
+ * ❌ DIP violation: a UI/business component imports a concrete vendor SDK.
+ * - Tests must monkey-patch a global module object to avoid "real" charges.
+ * - Demos, Storybook and other providers are impossible without editing it.
+ */
+@Component({
+  selector: 'app-bad-checkout-button',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <button type="button" (click)="pay()">Pay {{ label() }}</button>
+    <p role="status">{{ status() }}</p>
+  `,
+})
+export class BadCheckoutButtonComponent {
+  readonly email = input.required<string>();
+  readonly amount = input.required<Cents>();
+  protected readonly status = signal('');
+
+  protected label(): string {
+    return formatMoney(this.amount());
+  }
+
+  protected async pay(): Promise<void> {
+    const chargeId = await stripeClient.createCharge(this.email(), this.amount());
+    this.status.set(`Paid ${formatMoney(this.amount())} (${chargeId})`);
+  }
 }
 ```
 <!-- /snippet -->
@@ -6110,6 +6966,134 @@ createRoot(container).render(
 <!-- /snippet -->
 
 </details>
+<details>
+<summary><b>🅰️ Angular 22 + TypeScript</b> — <code>angular/src/app/dip/good/payment-gateway.ts</code>, <code>angular/src/app/dip/good/stripe-payment-gateway.ts</code>, <code>angular/src/app/dip/good/checkout-button.component.ts</code>, <code>angular/src/app/app.config.ts</code></summary>
+
+<!-- snippet: angular/src/app/dip/good/payment-gateway.ts, angular/src/app/dip/good/stripe-payment-gateway.ts, angular/src/app/dip/good/checkout-button.component.ts, angular/src/app/app.config.ts -->
+```typescript
+// ── angular/src/app/dip/good/payment-gateway.ts ──
+import { Cents } from '../../shared/money';
+
+/** ✅ The abstraction belongs to the app, written in business language. */
+export type PaymentResult =
+  | { readonly succeeded: true; readonly transactionId: string }
+  | { readonly succeeded: false; readonly error: string };
+
+/**
+ * An abstract class doubles as the DI token, so components can simply
+ * `inject(PaymentGateway)` without knowing which implementation is provided.
+ */
+export abstract class PaymentGateway {
+  abstract charge(customerEmail: string, amount: Cents): Promise<PaymentResult>;
+}
+
+// ── angular/src/app/dip/good/stripe-payment-gateway.ts ──
+import { Injectable, InjectionToken, inject } from '@angular/core';
+import { Cents } from '../../shared/money';
+import { PaymentGateway, PaymentResult } from './payment-gateway';
+
+/** Stand-in for a third-party SDK client. */
+export interface StripeLikeClient {
+  createCharge(customerEmail: string, amountInCents: Cents): Promise<string>;
+}
+
+export const STRIPE_CLIENT = new InjectionToken<StripeLikeClient>('STRIPE_CLIENT');
+
+/** ✅ Adapter: the low-level detail implements the app's abstraction. */
+@Injectable()
+export class StripePaymentGateway extends PaymentGateway {
+  private readonly client = inject(STRIPE_CLIENT);
+
+  async charge(customerEmail: string, amount: Cents): Promise<PaymentResult> {
+    try {
+      return { succeeded: true, transactionId: await this.client.createCharge(customerEmail, amount) };
+    } catch (error) {
+      return { succeeded: false, error: String(error) };
+    }
+  }
+}
+
+// ── angular/src/app/dip/good/checkout-button.component.ts ──
+import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
+import { Cents, formatMoney } from '../../shared/money';
+import { PaymentGateway } from './payment-gateway';
+
+/** ✅ Depends on the PaymentGateway abstraction, resolved by Angular's injector. */
+@Component({
+  selector: 'app-checkout-button',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <button type="button" [disabled]="busy()" (click)="pay()">Pay {{ label() }}</button>
+    <p role="status">{{ status() }}</p>
+  `,
+})
+export class CheckoutButtonComponent {
+  readonly email = input.required<string>();
+  readonly amount = input.required<Cents>();
+
+  private readonly payments = inject(PaymentGateway);
+  protected readonly label = computed(() => formatMoney(this.amount()));
+  protected readonly status = signal('');
+  protected readonly busy = signal(false);
+
+  protected async pay(): Promise<void> {
+    this.busy.set(true);
+    const result = await this.payments.charge(this.email(), this.amount());
+    this.status.set(
+      result.succeeded ? `Paid ${this.label()} (${result.transactionId})` : `Payment declined: ${result.error}`,
+    );
+    this.busy.set(false);
+  }
+}
+
+// ── angular/src/app/app.config.ts ──
+import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from '@angular/core';
+import { Observable, of } from 'rxjs';
+import { PaymentGateway } from './dip/good/payment-gateway';
+import { STRIPE_CLIENT, StripePaymentGateway } from './dip/good/stripe-payment-gateway';
+import { defaultPaymentOptions } from './ocp/good/payment-registry';
+import { OrderApi } from './srp/good/order-api';
+import { Order } from './srp/types';
+
+/** Demo data source so the gallery runs without a backend. */
+class DemoOrderApi {
+  load(orderId: string): Observable<Order> {
+    return of({
+      id: orderId,
+      lines: [
+        { sku: 'BOOK', name: 'Clean Architecture', unitPrice: 3200, quantity: 1 },
+        { sku: 'MUG', name: 'SOLID mug', unitPrice: 1200, quantity: 2 },
+      ],
+    });
+  }
+}
+
+/**
+ * Composition root: the ONLY place that knows which concrete implementations are used.
+ * Swap the Stripe client for the real SDK, a sandbox, or a fake for demos.
+ */
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideBrowserGlobalErrorListeners(),
+    provideZonelessChangeDetection(),
+    { provide: OrderApi, useClass: DemoOrderApi },
+    ...defaultPaymentOptions,
+    { provide: PaymentGateway, useClass: StripePaymentGateway },
+    {
+      provide: STRIPE_CLIENT,
+      useValue: {
+        createCharge: async (email: string, cents: number) => {
+          console.log(`[demo stripe] charging ${cents} cents to ${email}`);
+          return `ch_demo_${Date.now()}`;
+        },
+      },
+    },
+  ],
+};
+```
+<!-- /snippet -->
+
+</details>
 
 ### 🧪 Proving it with tests
 
@@ -6447,6 +7431,81 @@ describe("DIP - the solution", () => {
 <!-- /snippet -->
 
 </details>
+<details>
+<summary><b>🅰️ Angular 22 + TypeScript</b> — <code>angular/src/app/dip/dip.spec.ts</code></summary>
+
+<!-- snippet: angular/src/app/dip/dip.spec.ts -->
+```typescript
+import { TestBed } from '@angular/core/testing';
+import { BadCheckoutButtonComponent } from './bad/checkout-button.component';
+import { stripeClient } from './bad/stripe-client';
+import { CheckoutButtonComponent } from './good/checkout-button.component';
+import { PaymentGateway, PaymentResult } from './good/payment-gateway';
+import { STRIPE_CLIENT, StripePaymentGateway } from './good/stripe-payment-gateway';
+
+async function clickPay(fixture: { nativeElement: HTMLElement; whenStable(): Promise<unknown> }) {
+  fixture.nativeElement.querySelector('button')!.click();
+  await fixture.whenStable();
+  return fixture.nativeElement.querySelector('[role="status"]')!.textContent;
+}
+
+describe('DIP - the problem', () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it('needs to monkey-patch a global module object to avoid the real SDK', async () => {
+    vi.spyOn(stripeClient, 'createCharge').mockResolvedValue('ch_mocked');
+    const fixture = TestBed.createComponent(BadCheckoutButtonComponent);
+    fixture.componentRef.setInput('email', 'ana@example.com');
+    fixture.componentRef.setInput('amount', 2420);
+    await fixture.whenStable();
+
+    expect(await clickPay(fixture)).toContain('Paid €24.20 (ch_mocked)');
+  });
+});
+
+describe('DIP - the solution', () => {
+  async function renderWith(payments: PaymentGateway) {
+    TestBed.configureTestingModule({ providers: [{ provide: PaymentGateway, useValue: payments }] });
+    const fixture = TestBed.createComponent(CheckoutButtonComponent);
+    fixture.componentRef.setInput('email', 'ana@example.com');
+    fixture.componentRef.setInput('amount', 2420);
+    await fixture.whenStable();
+    return fixture;
+  }
+
+  it('charges through the injected gateway', async () => {
+    const charge = vi.fn<PaymentGateway['charge']>().mockResolvedValue({ succeeded: true, transactionId: 'tx_1' });
+    const fixture = await renderWith({ charge });
+
+    expect(fixture.nativeElement.querySelector('button').textContent).toContain('Pay €24.20');
+    expect(await clickPay(fixture)).toContain('Paid €24.20 (tx_1)');
+    expect(charge).toHaveBeenCalledWith('ana@example.com', 2420);
+  });
+
+  it('a declined payment is trivial to simulate', async () => {
+    const declined: PaymentResult = { succeeded: false, error: 'insufficient funds' };
+    const fixture = await renderWith({ charge: async () => declined });
+
+    expect(await clickPay(fixture)).toContain('Payment declined: insufficient funds');
+  });
+
+  it('the Stripe adapter maps SDK failures to the app result type', async () => {
+    TestBed.configureTestingModule({
+      providers: [
+        StripePaymentGateway,
+        { provide: STRIPE_CLIENT, useValue: { createCharge: () => Promise.reject(new Error('card expired')) } },
+      ],
+    });
+
+    const result = await TestBed.inject(StripePaymentGateway).charge('ana@example.com', 100);
+
+    expect(result).toEqual({ succeeded: false, error: 'Error: card expired' });
+  });
+});
+```
+<!-- /snippet -->
+
+</details>
 
 ### ✅ Benefits
 
@@ -6472,6 +7531,7 @@ describe("DIP - the solution", () => {
 | **Go** | *"Accept interfaces, return structs."* Define the interface in the **consumer** package; wire everything in `main()`. Pass `context.Context` explicitly. |
 | **TypeScript** | Constructor parameters typed with interfaces; the composition root is your app's entry point. Containers (InversifyJS, tsyringe) exist but are optional. |
 | **React** | **Context** (or props) to inject services: `<ServicesProvider services={{ payments }}>` and a `useServices()` hook. The provider in `main.tsx` is the composition root; tests wrap components with fakes. |
+| **Angular** | DIP is built into the framework: depend on an **abstract class or `InjectionToken`**, `inject()` it, and bind the implementation in `app.config.ts` (`{ provide: PaymentGateway, useClass: StripePaymentGateway }`). Tests override providers in `TestBed`. |
 
 ### ☑️ Checklist
 
@@ -6546,16 +7606,16 @@ sequenceDiagram
 
 ## 🌍 SOLID idioms per language
 
-| | 🟣 C# | 🐍 Python | 🐹 Go | 🔷 TypeScript | ⚛️ React |
-| --- | --- | --- | --- | --- | --- |
-| **Abstraction** | `interface` (nominal) | `Protocol` (structural) / `ABC` | implicit `interface` (structural) | `interface` / type (structural) | props types, hooks, context |
-| **S** | small `sealed` classes, records | modules, functions, small classes | packages, small structs, funcs | modules, pure functions | hooks + pure functions + dumb components |
-| **O** | Strategy + DI `IEnumerable<T>` | protocols, callables, entry points | small interfaces + func adapters | interfaces, object literals | composition, `children`, registries |
-| **L** | contract tests via `[MemberData]`; `sealed` by default | `mypy --strict`, parametrized contract tests | `var _ I = (*T)(nil)`, table tests | `@ts-expect-error`, `describe.each` | honour HTML props, `forwardRef`, `...rest` |
-| **I** | role interfaces, `IReadOnly*` | small protocols declared by clients | consumer-defined tiny interfaces | `Pick<>`, tiny interfaces | narrow props |
-| **D** | ctor injection, `Program.cs` | ctor params, `main()` composition | "accept interfaces, return structs", `main()` | ctor params, entry point | Context providers in `main.tsx` |
-| **Type checking of contracts** | compiler | mypy/pyright | compiler | compiler | compiler |
-| **Typical anti-pattern** | `NotSupportedException` overrides | `raise NotImplementedError` overrides | Java-style giant interfaces next to impl | `any`, `instanceof` chains | god components, prop drilling of whole objects |
+| | 🟣 C# | 🐍 Python | 🐹 Go | 🔷 TypeScript | ⚛️ React | 🅰️ Angular |
+| --- | --- | --- | --- | --- | --- | --- |
+| **Abstraction** | `interface` (nominal) | `Protocol` (structural) / `ABC` | implicit `interface` (structural) | `interface` / type (structural) | props types, hooks, context | abstract classes and `InjectionToken`s as DI tokens, `input()`s |
+| **S** | small `sealed` classes, records | modules, functions, small classes | packages, small structs, funcs | modules, pure functions | hooks + pure functions + dumb components | injectable services, pure functions, pipes, presentational components |
+| **O** | Strategy + DI `IEnumerable<T>` | protocols, callables, entry points | small interfaces + func adapters | interfaces, object literals | composition, `children`, registries | multi-providers, `NgComponentOutlet`, content projection |
+| **L** | contract tests via `[MemberData]`; `sealed` by default | `mypy --strict`, parametrized contract tests | `var _ I = (*T)(nil)`, table tests | `@ts-expect-error`, `describe.each` | honour HTML props, `forwardRef`, `...rest` | attribute-selector components on native elements, `describe.each` |
+| **I** | role interfaces, `IReadOnly*` | small protocols declared by clients | consumer-defined tiny interfaces | `Pick<>`, tiny interfaces | narrow props | narrow `input()`s |
+| **D** | ctor injection, `Program.cs` | ctor params, `main()` composition | "accept interfaces, return structs", `main()` | ctor params, entry point | Context providers in `main.tsx` | `inject()` + providers in `app.config.ts`, `TestBed` overrides |
+| **Type checking of contracts** | compiler | mypy/pyright | compiler | compiler | compiler | compiler + `strictTemplates` |
+| **Typical anti-pattern** | `NotSupportedException` overrides | `raise NotImplementedError` overrides | Java-style giant interfaces next to impl | `any`, `instanceof` chains | god components, prop drilling of whole objects | components injecting `HttpClient` or SDKs directly, god components |
 
 > [!TIP]
 > **Structural vs nominal typing.** In Python, Go and TypeScript a type satisfies an interface just by having the right methods. This makes ISP and DIP almost free: the *client* declares the small interface it needs, and existing types already satisfy it without being modified (which is OCP at its best).
@@ -6771,7 +7831,13 @@ S: separate hooks (data), pure functions (logic) and presentational components. 
 </details>
 
 <details>
-<summary><b>10. Can over-applying SOLID be harmful?</b></summary>
+<summary><b>10. How do SOLID principles apply to Angular?</b></summary>
+
+S: data access in injectable services, logic in pure functions, formatting in pipes, presentation in input-only components. O: multi-providers and `NgComponentOutlet`. L: attribute-selector components keep the native element's contract. I: narrow `input()`s. D: inject abstractions (abstract classes or `InjectionToken`s) and bind implementations in `app.config.ts`.
+</details>
+
+<details>
+<summary><b>11. Can over-applying SOLID be harmful?</b></summary>
 
 Yes: needless indirection, interface-per-class, fragmentation into tiny classes, speculative extension points. Balance with YAGNI and KISS; abstract along axes of change you've actually observed.
 </details>
@@ -6798,7 +7864,7 @@ Each exercise builds on the code in this repository. Do them in the language you
 | 6 | 🟡 | I | Add a `CsvExporter` that exports a month's orders. Which interface does it need? | Maybe a new role (`OrderQuery.ForMonth`) rather than adding methods to `OrderReader`. |
 | 7 | 🟠 | D | Add **Adyen** as a second payment provider selectable by configuration. | New adapter + composition-root change only. `CheckoutService` must not change. |
 | 8 | 🟠 | D | Make `CheckoutService` retry transient payment failures **without editing it**. | A *decorator*: `RetryingPaymentGateway : PaymentGateway` wrapping another gateway. |
-| 9 | 🔴 | All | Implement the full checkout from the [sequence diagram](#together) as a use case that combines all five ✅ examples. | Keep the use case free of infrastructure; write it test-first with fakes. |
+| 9 | 🔴 | All | Implement the full checkout from the [sequence diagram](#together) as a use case that combines the five ✅ examples. | Keep the use case free of infrastructure; write it test-first with fakes. |
 | 10 | 🔴 | All | Pick a 300+ line class from a real project you know. Write characterisation tests, then refactor it toward SOLID in < 10 small commits. | Follow [the legacy refactoring steps](#refactoring). |
 
 <a id="cheat-sheet"></a>
@@ -6891,6 +7957,16 @@ npm test          # component tests (Vitest + Testing Library)
 npm run dev       # gallery of the ✅ components at http://localhost:5173
 ```
 
+### 🅰️ Angular 22
+
+```bash
+cd angular
+npm ci
+npm run typecheck # strict TypeScript and strict templates
+npm test          # component tests (Vitest + Angular TestBed)
+npm start         # gallery of the ✅ components at http://localhost:4200
+```
+
 ### 📝 Keeping this README in sync
 
 ```bash
@@ -6910,7 +7986,7 @@ python3 scripts/sync_readme.py --check  # what CI runs
 ├── CODE_OF_CONDUCT.md · SECURITY.md · LICENSE (MIT)
 ├── scripts/sync_readme.py        ← keeps README code identical to the tested sources
 ├── .github/
-│   ├── workflows/ci.yml          ← builds, tests and reports coverage for all five projects
+│   ├── workflows/ci.yml          ← builds, tests and reports coverage for all six projects
 │   ├── workflows/codeql.yml      ← security and quality scanning
 │   ├── workflows/pr-title.yml    ← enforces Conventional Commit PR titles
 │   ├── workflows/release-please.yml ← versioning, changelog and GitHub Releases
@@ -6934,9 +8010,12 @@ python3 scripts/sync_readme.py --check  # what CI runs
 │   ├── .gitignore                ← Node.js / TypeScript
 │   ├── src/{srp,ocp,lsp,isp,dip}/{bad,good}.ts
 │   └── tests/*.test.ts
-└── react/
-    ├── .gitignore                ← Node.js / Vite / React
-    └── src/{srp,ocp,lsp,isp,dip}/{bad,good}/*.tsx  (tests in src/<principle>/*.test.tsx)
+├── react/
+│   ├── .gitignore                ← Node.js / Vite / React
+│   └── src/{srp,ocp,lsp,isp,dip}/{bad,good}/*.tsx  (tests in src/<principle>/*.test.tsx)
+└── angular/
+    ├── .gitignore                ← Angular CLI / Node.js
+    └── src/app/{srp,ocp,lsp,isp,dip}/{bad,good}/*.ts  (tests in src/app/<principle>/*.spec.ts)
 ```
 
 <a id="reading"></a>
@@ -6959,7 +8038,7 @@ python3 scripts/sync_readme.py --check  # what CI runs
 ## 🤝 Contributing
 
 Contributions are welcome — clearer explanations, new exercises or better examples. Please read
-[CONTRIBUTING.md](CONTRIBUTING.md) first: every example must stay equivalent across the five languages,
+[CONTRIBUTING.md](CONTRIBUTING.md) first: every example must stay equivalent across the six languages,
 commits follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/), and CI must be green.
 Security issues: see [SECURITY.md](SECURITY.md).
 
@@ -6969,7 +8048,7 @@ The repository itself applies the practices it teaches:
 
 | Practice | How |
 | --- | --- |
-| **Quality gates** | CI builds and tests five toolchains, enforces strict typing, linters and formatters, and publishes coverage on every pull request. |
+| **Quality gates** | CI builds and tests six toolchains, enforces strict typing, linters and formatters, and publishes coverage on every pull request. |
 | **Protected `main`** | Every change — including the maintainer's — goes through a pull request with green CI, a CodeQL gate, code-owner approval and signed commits. Force pushes and deletion are blocked. |
 | **Open to contributions** | Anyone can fork and open a pull request. Workflows from outside contributors run only after a maintainer approves them. |
 | **Supply-chain security** | Actions pinned to commit SHAs, least-privilege tokens, no persisted credentials, an allow-list of actions, protected release tags and an [OpenSSF Scorecard](https://scorecard.dev/viewer/?uri=github.com/danielfyo/solid-principles-dotnet). |
