@@ -1,0 +1,32 @@
+name: Bug report
+description: Something in the code or the docs is wrong.
+title: "fix: "
+labels: [bug]
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options: [README / explanation, C# (.NET), Python, Go, TypeScript, React, CI / tooling]
+    validations:
+      required: true
+  - type: dropdown
+    id: principle
+    attributes:
+      label: Principle
+      options: [Not specific, S - Single Responsibility, O - Open/Closed, L - Liskov Substitution, I - Interface Segregation, D - Dependency Inversion]
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: What is wrong?
+      description: Include file paths, the command you ran and its output if relevant.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+    validations:
+      required: true
