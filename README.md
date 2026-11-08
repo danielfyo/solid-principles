@@ -8,6 +8,7 @@
 
 [![CI](https://github.com/danielfyo/solid-principles-dotnet/actions/workflows/ci.yml/badge.svg)](https://github.com/danielfyo/solid-principles-dotnet/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/danielfyo/solid-principles-dotnet/actions/workflows/codeql.yml/badge.svg)](https://github.com/danielfyo/solid-principles-dotnet/actions/workflows/codeql.yml)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/danielfyo/solid-principles-dotnet/badge)](https://scorecard.dev/viewer/?uri=github.com/danielfyo/solid-principles-dotnet)
 [![Latest release](https://img.shields.io/github/v/release/danielfyo/solid-principles-dotnet?sort=semver)](https://github.com/danielfyo/solid-principles-dotnet/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-fe5196.svg?logo=conventionalcommits&logoColor=white)](https://www.conventionalcommits.org/en/v1.0.0/)
@@ -6913,6 +6914,7 @@ python3 scripts/sync_readme.py --check  # what CI runs
 │   ├── workflows/codeql.yml      ← security and quality scanning
 │   ├── workflows/pr-title.yml    ← enforces Conventional Commit PR titles
 │   ├── workflows/release-please.yml ← versioning, changelog and GitHub Releases
+│   ├── workflows/scorecard.yml   ← OpenSSF Scorecard supply-chain analysis
 │   ├── dependabot.yml            ← weekly dependency updates for every toolchain
 │   └── ISSUE_TEMPLATE/ · pull_request_template.md · CODEOWNERS
 ├── .editorconfig · .gitattributes ← consistent formatting and LF line endings
@@ -6968,8 +6970,11 @@ The repository itself applies the practices it teaches:
 | Practice | How |
 | --- | --- |
 | **Quality gates** | CI builds and tests five toolchains, enforces strict typing, linters and formatters, and publishes coverage on every pull request. |
-| **Security** | CodeQL scanning, Dependabot updates, least-privilege workflow permissions and a private vulnerability reporting policy. |
-| **Traceable history** | Conventional Commits, enforced on pull request titles; signed commits on a protected `main`. |
+| **Protected `main`** | Every change — including the maintainer's — goes through a pull request with green CI, a CodeQL gate, code-owner approval and signed commits. Force pushes and deletion are blocked. |
+| **Open to contributions** | Anyone can fork and open a pull request. Workflows from outside contributors run only after a maintainer approves them. |
+| **Supply-chain security** | Actions pinned to commit SHAs, least-privilege tokens, no persisted credentials, an allow-list of actions, protected release tags and an [OpenSSF Scorecard](https://scorecard.dev/viewer/?uri=github.com/danielfyo/solid-principles-dotnet). |
+| **Security scanning** | CodeQL, Dependabot alerts and updates, secret scanning with push protection, and private vulnerability reporting. |
+| **Traceable history** | Conventional Commits, enforced on pull request titles; signed, verified commits. |
 | **Automated releases** | release-please derives the next version and the [CHANGELOG](CHANGELOG.md) from the commit history. |
 | **Docs as code** | The README's code blocks are generated from the tested sources and verified in CI. |
 

@@ -75,12 +75,18 @@ Add `!` after the type (`feat!:`) for breaking changes.
 
 ## Pull request process
 
-1. Fork the repository and create a branch from `main` (`feat/<topic>`, `fix/<topic>`, `docs/<topic>`).
+Nobody pushes to `main` directly, maintainers included: every change arrives through a pull request.
+
+1. **Fork** the repository and create a branch from `main` (`feat/<topic>`, `fix/<topic>`, `docs/<topic>`).
 2. Make your change in all five languages, with tests, and run the checks above.
-3. Open a pull request using the template. Its title must be a Conventional Commit.
-4. `main` is protected: CI must be green and **commits must be signed**
-   ([how to sign commits](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits)).
-   Pull requests are merged with a merge commit or squashed.
+3. Open a pull request from your fork using the template. Its title must be a Conventional Commit.
+4. **Workflow approval.** For security, GitHub Actions do not run on pull requests from outside
+   contributors until a maintainer approves them. Expect a short wait before CI starts.
+5. **Merge requirements** on `main`:
+   - CI, CodeQL and the PR title check are green, with no high-severity code scanning alerts.
+   - A code owner has approved the latest changes and every review conversation is resolved.
+   - **Commits are signed** ([how to sign commits](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits)).
+   - Pull requests are merged with a merge commit or squashed (no rebase merges).
 
 ## Code of Conduct
 
