@@ -24,7 +24,7 @@
     "@angular/compiler-cli": "^22.2.0",
     "jsdom": "^30.0.0",
     "typescript": "~6.0.2",
-    "vitest": "^5.0.0",
+    "vitest": "^5.1.1",
     "@vitest/coverage-v8": "^5.1.0"
   },
   "description": "SOLID principles applied to Angular components, services and dependency injection."
